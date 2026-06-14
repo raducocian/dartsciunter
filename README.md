@@ -1,7 +1,4 @@
-# 🎯 Chalk — Darts Trainer
-
-*Keep the score in your head.* In darts, the **chalker** keeps score — this
-app trains you to be your own.
+# 🎯 T20 — Darts Trainer
 
 A self-contained web app for the core darts-counting skills:
 

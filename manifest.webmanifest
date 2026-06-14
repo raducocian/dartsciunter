@@ -1,7 +1,7 @@
 {
-  "name": "Chalk — Darts Trainer",
-  "short_name": "Chalk",
-  "description": "Keep the score in your head: practice darts subtraction, additions and checkouts.",
+  "name": "T20 — Darts Trainer",
+  "short_name": "T20",
+  "description": "Practice darts counting: subtraction, additions and checkouts.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "background_color": "#0e1116",
   "theme_color": "#0e1116",
   "icons": [
-    { "src": "icon.svg?v=4", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon.svg?v=4", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "icon.svg?v=5", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg?v=5", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }

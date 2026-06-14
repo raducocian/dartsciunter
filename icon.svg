@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Chalk T20">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="T20">
   <defs>
     <filter id="sketch" x="-15%" y="-15%" width="130%" height="130%">
       <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="3" seed="7" result="n"/>
@@ -8,19 +8,10 @@
 
   <rect width="512" height="512" rx="114" fill="#12181f"/>
 
-  <g filter="url(#sketch)" fill="none" stroke="#e9e2d0" stroke-width="8" stroke-linecap="round">
-    <!-- hand-drawn ring -->
-    <circle cx="256" cy="256" r="186"/>
-    <!-- a few chalk ticks like board segments -->
-    <line x1="256" y1="86"  x2="256" y2="116"/>
-    <line x1="256" y1="396" x2="256" y2="426"/>
-    <line x1="86"  y1="256" x2="116" y2="256"/>
-    <line x1="396" y1="256" x2="426" y2="256"/>
+  <g filter="url(#sketch)">
+    <circle cx="256" cy="256" r="190" fill="none" stroke="#e9e2d0" stroke-width="9" stroke-linecap="round"/>
+    <text x="256" y="266" text-anchor="middle" dominant-baseline="central" fill="#e9e2d0"
+          font-family="'Trebuchet MS','Arial Rounded MT Bold',Arial,sans-serif"
+          font-weight="800" font-size="184" letter-spacing="-8">T20</text>
   </g>
-
-  <!-- the magic number, chalked -->
-  <text x="256" y="264" text-anchor="middle" dominant-baseline="central"
-        filter="url(#sketch)" fill="#e9e2d0"
-        font-family="'Trebuchet MS','Arial Rounded MT Bold',Arial,sans-serif"
-        font-weight="800" font-size="172" letter-spacing="-8">T20</text>
 </svg>
