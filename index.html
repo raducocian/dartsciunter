@@ -58,6 +58,28 @@
   .pill{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;color:var(--muted)}
   .kbd{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px}
   a{color:var(--accent2)}
+  /* coach panel + toggle */
+  .coachbar{display:flex;align-items:center;justify-content:space-between;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:13.5px}
+  .coachbar .cl{color:var(--muted)} .coachbar .cl b{color:var(--txt)}
+  .switch{position:relative;display:inline-block;width:46px;height:26px;flex:0 0 auto}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--line);
+    border-radius:26px;transition:.2s;cursor:pointer}
+  .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;
+    background:var(--muted);border-radius:50%;transition:.2s}
+  .switch input:checked + .slider{background:var(--accent)}
+  .switch input:checked + .slider:before{transform:translateX(20px);background:#06150d}
+  .coach{background:linear-gradient(180deg,rgba(33,192,122,.13),rgba(33,192,122,.04));
+    border:1px dashed rgba(33,192,122,.5);border-radius:12px;padding:9px 14px;margin:2px 0 8px;
+    display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap}
+  .coach.miss{background:linear-gradient(180deg,rgba(255,90,90,.14),rgba(255,90,90,.04));
+    border-color:rgba(255,90,90,.5)}
+  .coach .k{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent)}
+  .coach.miss .k{color:var(--bad)}
+  .coach .v{font-size:22px;font-weight:800;color:var(--txt)}
+  .coach .m{color:var(--muted);font-size:15px}
+  .coach.hidden{display:none}
 </style>
 </head>
 <body>
@@ -73,6 +95,11 @@
     <div class="tab" data-mode="leg">Full Leg</div>
   </div>
 
+  <div class="coachbar">
+    <span class="cl"><b>💡 Coach panel</b> — show what it should be</span>
+    <label class="switch"><input type="checkbox" id="coachToggle" checked><span class="slider"></span></label>
+  </div>
+
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
     <div class="card">
@@ -80,6 +107,11 @@
         <div class="label">Score on</div>
         <div class="big" id="subScore">501</div>
         <div class="sub">You threw <span class="visit" id="subVisit">—</span> this visit</div>
+      </div>
+      <div class="coach hidden" id="subCoach">
+        <span class="k">Should be</span>
+        <span class="m" id="subCoachM"></span>
+        <span class="v" id="subCoachV"></span>
       </div>
       <input class="answer" id="subInput" inputmode="numeric" placeholder="remaining score" />
       <div class="hint info" id="subHint">Type the score you have left, then Enter.</div>
@@ -104,6 +136,10 @@
         <div class="label">Checkout from</div>
         <div class="big" id="coScore">—</div>
         <div class="sub" id="coDarts">finish on a double</div>
+      </div>
+      <div class="coach hidden" id="coCoach">
+        <span class="k">Should be</span>
+        <span class="v" id="coCoachV"></span>
       </div>
       <input class="answer" id="coInput" placeholder="e.g. T20 T20 DB  or  40 D... " autocapitalize="characters" autocomplete="off" />
       <div class="hint info" id="coHint">Enter a finishing combination. Last dart must be a double.</div>
@@ -141,6 +177,11 @@
         <div class="label" id="legLabel">Score on</div>
         <div class="big" id="legScore">501</div>
         <div class="sub" id="legSub">You threw <span class="visit" id="legThrow">—</span></div>
+      </div>
+      <div class="coach hidden" id="legCoach">
+        <span class="k">Should be</span>
+        <span class="m" id="legCoachM"></span>
+        <span class="v" id="legCoachV"></span>
       </div>
       <input class="answer" id="legInput" placeholder="remaining score" autocomplete="off" />
       <div class="hint info" id="legHint">Subtract each visit. At ≤170 you'll be asked to close it out.</div>
@@ -318,6 +359,45 @@ function record(ok, ms){
 /*  DOM helpers + mode switching                                       */
 /* ------------------------------------------------------------------ */
 function el(id){return document.getElementById(id);}
+
+/* ----- Coach panel ("Should be ...") shared across modes ----------- */
+let coachOn = JSON.parse(localStorage.getItem('dartsCoach') ?? 'true');
+el('coachToggle').checked = coachOn;
+el('coachToggle').onchange = e=>{
+  coachOn = e.target.checked;
+  localStorage.setItem('dartsCoach', JSON.stringify(coachOn));
+  refreshCoach();
+};
+function refreshCoach(){
+  if(mode==='subtract') renderSubCoach();
+  if(mode==='checkout') renderCoCoach();
+  if(mode==='leg') renderLegCoach();
+}
+// force=true reveals the answer even when coach is off (Duolingo-style miss)
+function renderSubCoach(force){
+  const c=el('subCoach');
+  if((coachOn||force) && subState.answer!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    el('subCoachM').textContent=subState.score+' − '+subState.visit+' =';
+    el('subCoachV').textContent=subState.answer;
+  } else c.classList.add('hidden');
+}
+function renderCoCoach(force){
+  const c=el('coCoach');
+  if((coachOn||force) && coState.score!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    el('coCoachV').textContent=standardCheckout(coState.score);
+  } else c.classList.add('hidden');
+}
+function renderLegCoach(force){
+  const c=el('legCoach');
+  if((coachOn||force) && leg.score!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    if(leg.phase==='subtract'){ el('legCoachM').textContent=leg.score+' − '+leg.thrown+' ='; el('legCoachV').textContent=leg.answer; }
+    else { el('legCoachM').textContent=''; el('legCoachV').textContent=standardCheckout(leg.score); }
+  } else c.classList.add('hidden');
+}
+
 let mode='subtract';
 document.querySelectorAll('.tab').forEach(t=>{
   t.onclick=()=>{
@@ -356,6 +436,7 @@ function newSub(){
   el('subVisit').textContent=visit;
   const inp=el('subInput'); inp.value=''; inp.className='answer';
   setHint('subHint','Type the score you have left.','info');
+  renderSubCoach();
   inp.focus();
 }
 function checkSub(){
@@ -370,7 +451,8 @@ function checkSub(){
     setTimeout(newSub,650);
   } else {
     inp.className='answer bad';
-    setHint('subHint','✗ '+subState.score+' − '+subState.visit+' = '+subState.answer,'bad');
+    setHint('subHint','✗ Not quite — see below','bad');
+    renderSubCoach(true);
     record(false,ms);
     subState.chainScore=null;
   }
@@ -392,6 +474,7 @@ function newCo(){
                               (score<=110?'2–3 darts · finish on a double':'3 darts · finish on a double');
   const inp=el('coInput'); inp.value=''; inp.className='answer';
   setHint('coHint','Enter a finishing combination. Last dart must be a double.','info');
+  renderCoCoach();
   inp.focus();
 }
 function checkCo(){
@@ -403,10 +486,12 @@ function checkCo(){
   if(r.sum!==coState.score){
     inp.className='answer bad';
     setHint('coHint','✗ That sums to '+r.sum+', need '+coState.score,'bad');
+    renderCoCoach(true);
     record(false,ms);
   } else if(!r.finishesDouble){
     inp.className='answer bad';
     setHint('coHint','✗ Sum is right but you must finish on a double','bad');
+    renderCoCoach(true);
     record(false,ms);
   } else {
     inp.className='answer good';
@@ -455,7 +540,9 @@ function newLeg(reset){
     el('legInput').setAttribute('autocapitalize','off');
     setHint('legHint','Subtract this visit and enter what\'s left.','info');
   }
-  const inp=el('legInput'); inp.value=''; inp.className='answer'; inp.focus();
+  const inp=el('legInput'); inp.value=''; inp.className='answer';
+  renderLegCoach();
+  inp.focus();
   leg.t0=performance.now();
 }
 function checkLeg(){
@@ -471,7 +558,8 @@ function checkLeg(){
       setTimeout(()=>newLeg(false),550);
     } else {
       inp.className='answer bad';
-      setHint('legHint','✗ '+leg.score+' − '+leg.thrown+' = '+leg.answer,'bad');
+      setHint('legHint','✗ Not quite — see below','bad');
+      renderLegCoach(true);
       record(false,ms);
     }
   } else { // checkout
@@ -480,7 +568,7 @@ function checkLeg(){
     if(r.sum!==leg.score || !r.finishesDouble){
       inp.className='answer bad';
       const why = r.sum!==leg.score ? ('sums to '+r.sum+', need '+leg.score) : 'must finish on a double';
-      setHint('legHint','✗ '+why,'bad'); record(false,ms);
+      setHint('legHint','✗ '+why,'bad'); renderLegCoach(true); record(false,ms);
     } else {
       inp.className='answer good';
       leg.dartsThrown+=r.darts.length;
