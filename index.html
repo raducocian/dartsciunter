@@ -744,6 +744,9 @@ function newCo(){
 function addDart(tok){
   if(coState.done || coTokens.length>=3) return;
   coTokens.push(tok); renderCombo(); updateCoInfo();
+  // auto-throw the moment a valid checkout is entered
+  const r=parseCheckout(comboStr());
+  if(!r.error && r.sum===coState.score && r.finishesDouble) checkCo();
 }
 function reactivate(){ // re-open a round so the board is editable again after Throw/Reveal
   if(coState.done){ coState.done=false; el('coGo').textContent='Throw ▸'; renderCoCoach(); }
