@@ -94,6 +94,16 @@
   .chip{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:5px 12px;font-weight:800;font-size:18px}
   .chip.dbl{border-color:var(--accent);color:var(--accent)}
   .chip.trb{border-color:var(--accent2);color:var(--accent2)}
+  /* daily progress */
+  .phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .todayline{font-size:14px;color:var(--txt);margin-bottom:10px}
+  .todayline b{color:var(--accent)}
+  .pday{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
+  .pday .d{width:52px;color:var(--muted);flex:0 0 auto}
+  .pday .barwrap{flex:1;background:var(--panel2);border-radius:6px;height:15px;overflow:hidden;border:1px solid var(--line)}
+  .pday .bar{height:100%;border-radius:6px;min-width:2px}
+  .pday .v{width:104px;text-align:right;flex:0 0 auto;color:var(--txt);font-variant-numeric:tabular-nums}
+  .pday.today .d{color:var(--accent);font-weight:800}
 </style>
 </head>
 <body>
@@ -217,7 +227,17 @@
     <div class="stat"><div class="v" id="stAcc">100%</div><div class="k">Accuracy</div></div>
     <div class="stat"><div class="v" id="stTime">—</div><div class="k">Avg sec</div></div>
   </div>
-  <p class="note" style="text-align:center">Reset stats: <a href="#" id="resetStats">clear</a> · Keyboard: type answer + <span class="kbd">Enter</span></p>
+
+  <div class="card" style="margin-top:14px">
+    <div class="phead">
+      <span class="label" style="color:var(--muted);letter-spacing:1px">📈 DAILY PROGRESS</span>
+      <span class="pill" id="dayStreak">🔥 0 days</span>
+    </div>
+    <div id="todayLine" class="todayline"></div>
+    <div id="progress"></div>
+  </div>
+
+  <p class="note" style="text-align:center">All stats are saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a> · type answer + <span class="kbd">Enter</span></p>
 </div>
 
 <script>
@@ -359,7 +379,14 @@ function parseCheckout(str){
 /*  Stats                                                              */
 /* ------------------------------------------------------------------ */
 const S = JSON.parse(localStorage.getItem('dartsStats')||'null') || {correct:0,total:0,timeMs:0,timed:0,streak:0};
-function saveStats(){ localStorage.setItem('dartsStats', JSON.stringify(S)); renderStats(); }
+const DAILY = JSON.parse(localStorage.getItem('dartsDaily')||'{}');
+function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayKey(){ return dkey(new Date()); }
+function saveStats(){
+  localStorage.setItem('dartsStats', JSON.stringify(S));
+  localStorage.setItem('dartsDaily', JSON.stringify(DAILY));
+  renderStats(); renderProgress();
+}
 function renderStats(){
   el('stCorrect').textContent=S.correct;
   el('stTotal').textContent=S.total;
@@ -370,7 +397,40 @@ function renderStats(){
 function record(ok, ms){
   S.total++; if(ok){S.correct++; S.streak++;} else S.streak=0;
   if(ms!=null){ S.timeMs+=ms; S.timed++; }
+  const k=todayKey(); const d=DAILY[k]||(DAILY[k]={correct:0,total:0,timeMs:0,timed:0});
+  d.total++; if(ok)d.correct++; if(ms!=null){ d.timeMs+=ms; d.timed++; }
   saveStats();
+}
+/* ----- daily progress rendering ----- */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDay(k){ const p=k.split('-'); return MON[+p[1]-1]+' '+(+p[2]); }
+function dayStreakCount(){
+  let n=0, d=new Date();
+  if(!DAILY[dkey(d)]) d.setDate(d.getDate()-1); // today not yet practiced -> count up to yesterday
+  while(DAILY[dkey(d)]){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function renderProgress(){
+  const n=dayStreakCount();
+  el('dayStreak').textContent='🔥 '+n+' day'+(n===1?'':'s');
+  const td=DAILY[todayKey()];
+  el('todayLine').innerHTML = td
+    ? `Today: <b>${td.correct}/${td.total}</b> correct · ${Math.round(100*td.correct/td.total)}%`
+      + (td.timed?` · ${(td.timeMs/td.timed/1000).toFixed(1)}s avg`:'')
+    : 'Today: <span style="color:var(--muted)">no attempts yet</span>';
+  const keys=Object.keys(DAILY).sort();
+  const recent=keys.slice(-14);
+  const box=el('progress');
+  if(!recent.length){ box.innerHTML='<div class="note" style="text-align:center;margin:4px 0">No history yet — your daily results will show here.</div>'; return; }
+  const max=Math.max(1,...recent.map(k=>DAILY[k].total));
+  box.innerHTML=recent.map(k=>{
+    const d=DAILY[k], acc=d.total?Math.round(100*d.correct/d.total):0;
+    const col=acc>=80?'var(--good)':acc>=60?'var(--warn)':'var(--bad)';
+    const w=Math.round(100*d.total/max);
+    return `<div class="pday${k===todayKey()?' today':''}"><span class="d">${fmtDay(k)}</span>`
+      +`<span class="barwrap"><span class="bar" style="width:${w}%;background:${col}"></span></span>`
+      +`<span class="v">${d.correct}/${d.total} · ${acc}%</span></div>`;
+  }).join('');
 }
 
 /* ------------------------------------------------------------------ */
@@ -685,9 +745,14 @@ el('legInput').addEventListener('keydown',e=>{ if(e.key==='Enter') checkLeg(); }
 /* ------------------------------------------------------------------ */
 function setHint(id,msg,cls){ const h=el(id); h.textContent=msg; h.className='hint '+(cls||'info'); }
 el('resetStats').onclick=e=>{ e.preventDefault(); S.correct=S.total=S.timeMs=S.timed=S.streak=0; saveStats(); };
+el('resetHistory').onclick=e=>{ e.preventDefault();
+  if(confirm('Clear your daily progress history? (running totals are kept)')){
+    for(const k in DAILY) delete DAILY[k]; saveStats();
+  }
+};
 
 /* init */
-renderStats(); newSub();
+renderStats(); renderProgress(); newSub();
 </script>
 </body>
 </html>
