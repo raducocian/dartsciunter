@@ -157,7 +157,7 @@
       </div>
       <div class="combo" id="coCombo"></div>
       <div class="hint info" id="coHint">Tap the board to build your finish — last dart must be a double.</div>
-      <div class="boardwrap"><svg id="board" viewBox="-210 -210 420 420" aria-label="dartboard"></svg></div>
+      <div class="boardwrap"><svg id="board" viewBox="-222 -222 444 444" aria-label="dartboard"></svg></div>
       <div class="row">
         <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
         <button type="button" class="btn alt" id="coClear">Clear</button>
@@ -178,7 +178,6 @@
       </label>
       <label><input type="checkbox" id="coShowChart"> Show chart</label>
     </div>
-    <p class="note">Tap a board segment to add a dart: the thin outer ring is the <b>double</b>, the thin inner ring is the <b>treble</b>, the big areas are <b>singles</b>, the green ring is <b>25</b> and the red centre is <b>bull (50)</b>. Build up to 3 darts, finish on a double, then <b>Throw</b>. Any valid checkout counts — Reveal shows a standard one.</p>
     <div class="card" id="chartCard" style="display:none">
       <div class="label" style="color:var(--muted);margin-bottom:8px;letter-spacing:1px">STANDARD CHECKOUT CHART</div>
       <div class="chart" id="chart"></div>
@@ -558,7 +557,8 @@ el('coRange').onchange=newCo;
   const svg=el('board');
   const order=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
   const NS='http://www.w3.org/2000/svg';
-  const R={ ibull:13, obull:32, sin:106, tin:122, sout:170, dout:186 };
+  // hit areas deliberately not to scale: treble & double rings widened to be easy to tap
+  const R={ ibull:18, obull:40, sin:94, tin:126, sout:158, dout:194 };
   const BLACK='#27241d', CREAM='#e7d9b4', RED='#c9362a', GREEN='#2f8c4e';
   // top-clockwise angle θ (deg) -> screen coords
   const pt=(deg,r)=>{ const a=deg*Math.PI/180; return [ (r*Math.sin(a)).toFixed(2), (-r*Math.cos(a)).toFixed(2) ]; };
@@ -596,7 +596,7 @@ el('coRange').onchange=newCo;
   });
   // numbers around the outside
   order.forEach((n,i)=>{
-    const [x,y]=pt(i*18, R.dout+16);
+    const [x,y]=pt(i*18, R.dout+14);
     const t=document.createElementNS(NS,'text'); t.setAttribute('class','num');
     t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=n; svg.appendChild(t);
   });
