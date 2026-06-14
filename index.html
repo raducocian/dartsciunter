@@ -156,7 +156,6 @@
       <div class="prompt">
         <div class="label">Checkout from</div>
         <div class="big" id="coScore">—</div>
-        <div class="sub" id="coDarts">finish on a double</div>
       </div>
       <div class="coach hidden" id="coCoach">
         <span class="k">Should be</span>
@@ -563,8 +562,6 @@ function newCo(){
   coState={score, t0:performance.now(), done:false};
   coTokens=[];
   el('coScore').textContent=score;
-  el('coDarts').textContent = score<=40&&score%2===0 ? 'one dart finish possible' :
-                              (score<=110?'2–3 darts · finish on a double':'3 darts · finish on a double');
   el('coGo').textContent='Throw ▸';
   renderCombo();
   setHint('coHint','Tap the board to build your finish — last dart must be a double.','info');
