@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Darts Counter Trainer</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#171c24; --panel2:#1f2733; --line:#2b3442;
+    --txt:#e8edf3; --muted:#8a97a8; --accent:#21c07a; --accent2:#2e9bff;
+    --bad:#ff5a5a; --good:#21c07a; --warn:#f5b942;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:560px;margin:0 auto;padding:14px 14px 40px;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:20px;margin:0;letter-spacing:.3px}
+  h1 .dot{color:var(--accent)}
+  .tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:12px;margin-bottom:14px}
+  .tab{flex:1;text-align:center;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;
+    color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .tab.active{background:var(--accent);color:#06150d}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  .prompt{text-align:center;padding:6px 0 4px}
+  .prompt .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px}
+  .big{font-size:56px;font-weight:800;line-height:1;margin:8px 0}
+  .sub{color:var(--muted);font-size:15px}
+  .visit{font-size:20px;color:var(--accent2);font-weight:700}
+  .answer{width:100%;font-size:34px;text-align:center;padding:12px;border-radius:12px;
+    border:2px solid var(--line);background:var(--panel2);color:var(--txt);outline:none;font-weight:700}
+  .answer.bad{border-color:var(--bad)}
+  .answer.good{border-color:var(--good)}
+  .answer::placeholder{color:#566; font-weight:500; font-size:18px}
+  .hint{min-height:22px;text-align:center;margin-top:10px;font-size:15px;font-weight:600}
+  .hint.good{color:var(--good)} .hint.bad{color:var(--bad)} .hint.info{color:var(--muted)}
+  .row{display:flex;gap:10px;margin-top:12px}
+  button{font-family:inherit;border:none;cursor:pointer;font-weight:700}
+  .btn{flex:1;padding:14px;border-radius:12px;font-size:16px;background:var(--accent);color:#06150d}
+  .btn.alt{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn:active{transform:translateY(1px)}
+  .stats{display:flex;gap:10px}
+  .stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+  .stat .v{font-size:22px;font-weight:800}
+  .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .key{padding:16px;border-radius:12px;background:var(--panel2);color:var(--txt);font-size:22px;border:1px solid var(--line)}
+  .key.act{background:var(--accent2);color:#04121f}
+  .key.del{background:#33202a;color:var(--bad)}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;color:var(--muted);font-size:14px}
+  .opts label{display:flex;align-items:center;gap:6px;background:var(--panel2);padding:6px 10px;border-radius:9px;border:1px solid var(--line)}
+  select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:14px;font-family:inherit}
+  .note{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:6px}
+  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;font-size:13px}
+  .chart .c{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;display:flex;justify-content:space-between}
+  .chart .c b{color:var(--accent)}
+  .leg-board{display:flex;justify-content:space-around;margin-bottom:6px}
+  .pill{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;color:var(--muted)}
+  .kbd{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px}
+  a{color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎯 Darts <span class="dot">Trainer</span></h1>
+    <div class="pill" id="streakPill">Streak 0</div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-mode="subtract">Subtract</div>
+    <div class="tab" data-mode="checkout">Closings</div>
+    <div class="tab" data-mode="leg">Full Leg</div>
+  </div>
+
+  <!-- ============ SUBTRACT ============ -->
+  <section id="m-subtract">
+    <div class="card">
+      <div class="prompt">
+        <div class="label">Score on</div>
+        <div class="big" id="subScore">501</div>
+        <div class="sub">You threw <span class="visit" id="subVisit">—</span> this visit</div>
+      </div>
+      <input class="answer" id="subInput" inputmode="numeric" placeholder="remaining score" />
+      <div class="hint info" id="subHint">Type the score you have left, then Enter.</div>
+      <div class="row">
+        <button class="btn alt" id="subReveal">Reveal</button>
+        <button class="btn" id="subNext">New (Enter)</button>
+      </div>
+    </div>
+    <div class="opts">
+      <label>Darts per visit
+        <select id="subDarts"><option value="3">3 (full visit)</option><option value="1">1 (single dart)</option></select>
+      </label>
+      <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
+    </div>
+    <p class="note">Practice subtracting fast like at the oche. With <b>Chain</b> on, each correct answer continues the same leg from your new total down toward a finish.</p>
+  </section>
+
+  <!-- ============ CHECKOUT ============ -->
+  <section id="m-checkout" style="display:none">
+    <div class="card">
+      <div class="prompt">
+        <div class="label">Checkout from</div>
+        <div class="big" id="coScore">—</div>
+        <div class="sub" id="coDarts">finish on a double</div>
+      </div>
+      <input class="answer" id="coInput" placeholder="e.g. T20 T20 DB  or  40 D... " autocapitalize="characters" autocomplete="off" />
+      <div class="hint info" id="coHint">Enter a finishing combination. Last dart must be a double.</div>
+      <div class="row">
+        <button class="btn alt" id="coReveal">Reveal</button>
+        <button class="btn" id="coNext">New (Enter)</button>
+      </div>
+    </div>
+    <div class="opts">
+      <label>Range
+        <select id="coRange">
+          <option value="easy">Doubles &amp; easy (2–60)</option>
+          <option value="mid" selected>Common (61–120)</option>
+          <option value="big">Big finishes (121–170)</option>
+          <option value="all">Anything (2–170)</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="coShowChart"> Show chart</label>
+    </div>
+    <p class="note">Notation: <span class="kbd">T20</span> treble, <span class="kbd">D16</span> double, <span class="kbd">20</span> single, <span class="kbd">DB</span> double-bull (50), <span class="kbd">SB</span> single-bull (25). Separate darts with spaces. Any valid checkout is accepted — Reveal shows a standard one.</p>
+    <div class="card" id="chartCard" style="display:none">
+      <div class="label" style="color:var(--muted);margin-bottom:8px;letter-spacing:1px">STANDARD CHECKOUT CHART</div>
+      <div class="chart" id="chart"></div>
+    </div>
+  </section>
+
+  <!-- ============ FULL LEG ============ -->
+  <section id="m-leg" style="display:none">
+    <div class="card">
+      <div class="leg-board">
+        <span class="pill">Visit <b id="legVisit">1</b></span>
+        <span class="pill">Darts <b id="legDarts">0</b></span>
+      </div>
+      <div class="prompt">
+        <div class="label" id="legLabel">Score on</div>
+        <div class="big" id="legScore">501</div>
+        <div class="sub" id="legSub">You threw <span class="visit" id="legThrow">—</span></div>
+      </div>
+      <input class="answer" id="legInput" placeholder="remaining score" autocomplete="off" />
+      <div class="hint info" id="legHint">Subtract each visit. At ≤170 you'll be asked to close it out.</div>
+      <div class="row">
+        <button class="btn alt" id="legReveal">Reveal</button>
+        <button class="btn" id="legNext">Confirm (Enter)</button>
+      </div>
+    </div>
+    <p class="note">Plays a full 501 leg: subtract every visit, then enter the finishing combo when you reach checkout range. Realistic visit totals are generated for you.</p>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="stCorrect">0</div><div class="k">Correct</div></div>
+    <div class="stat"><div class="v" id="stTotal">0</div><div class="k">Attempts</div></div>
+    <div class="stat"><div class="v" id="stAcc">100%</div><div class="k">Accuracy</div></div>
+    <div class="stat"><div class="v" id="stTime">—</div><div class="k">Avg sec</div></div>
+  </div>
+  <p class="note" style="text-align:center">Reset stats: <a href="#" id="resetStats">clear</a> · Keyboard: type answer + <span class="kbd">Enter</span></p>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ */
+/*  Dart maths helpers                                                 */
+/* ------------------------------------------------------------------ */
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+
+// Generate a single realistic dart score (weighted toward 20-area trebles).
+function randomDart(){
+  const r = Math.random();
+  if(r < 0.40){ // treble attempt
+    const base = pick([20,20,20,19,18,17,16,15,14,13,12,10,7,5,1]);
+    return 3*base;
+  } else if(r < 0.55){ // bulls
+    return pick([25,25,50]);
+  } else { // single, in the chosen sector
+    const base = pick([20,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]);
+    return base;
+  }
+}
+// A realistic 3-dart visit total (not exceeding remaining where sensible).
+function randomVisit(remaining){
+  // Common scoring totals weighted, but also allow random 3-dart sums.
+  let total;
+  if(Math.random() < 0.5){
+    total = pick([60,60,45,41,85,100,26,81,40,140,180,57,55,43,66,95,121,30,36,38]);
+  } else {
+    total = randomDart()+randomDart()+randomDart();
+  }
+  if(remaining != null){
+    // don't let a visit bust or leave a score < 2 (not checkoutable) for realism
+    if(total > remaining-2 && remaining-2 >= 0) total = Math.min(total, remaining-2);
+    if(total < 0) total = 0;
+    if(remaining <= 1) total = 0;
+  }
+  return total;
+}
+
+/* ----- Checkout solver --------------------------------------------- */
+// Build all single-dart options.
+function dartList(){
+  const out = [];
+  for(let i=1;i<=20;i++) out.push({v:i, dbl:false, lbl:String(i)});
+  out.push({v:25, dbl:false, lbl:'SB'});
+  for(let i=1;i<=20;i++) out.push({v:3*i, dbl:false, lbl:'T'+i});
+  for(let i=1;i<=20;i++) out.push({v:2*i, dbl:true, lbl:'D'+i});
+  out.push({v:50, dbl:true, lbl:'DB'});
+  return out;
+}
+const DARTS = dartList();
+const DOUBLES = DARTS.filter(d=>d.dbl);
+// Preference order for a "nice" checkout: high trebles / bull first as setup darts.
+const SETUP = [...DARTS].sort((a,b)=> b.v - a.v);
+
+// Curated standard checkouts (the classic pro paths) for the common scores.
+const STANDARD = {
+  170:'T20 T20 DB',167:'T20 T19 DB',164:'T20 T18 DB',161:'T20 T17 DB',160:'T20 T20 D20',
+  158:'T20 T20 D19',157:'T20 T19 D20',156:'T20 T20 D18',155:'T20 T19 D19',154:'T20 T18 D20',
+  153:'T20 T19 D18',152:'T20 T20 D16',151:'T20 T17 D20',150:'T20 T18 D18',149:'T20 T19 D16',
+  148:'T20 T16 D20',147:'T20 T17 D18',146:'T20 T18 D16',145:'T20 T15 D20',144:'T20 T20 D12',
+  143:'T20 T17 D16',142:'T20 T14 D20',141:'T20 T19 D12',140:'T20 T20 D10',139:'T20 T13 D20',
+  138:'T20 T18 D12',137:'T20 T19 D10',136:'T20 T20 D8',135:'T20 T17 D12',134:'T20 T14 D16',
+  133:'T20 T19 D8',132:'T20 T16 D12',131:'T20 T13 D16',130:'T20 T18 D8',129:'T19 T16 D12',
+  128:'T18 T14 D16',127:'T20 T17 D8',126:'T19 T19 D6',125:'T20 T19 D4',124:'T20 T16 D8',
+  123:'T19 T16 D9',122:'T18 T20 D4',121:'T20 T11 D14',120:'T20 20 D20',119:'T19 T12 D13',
+  118:'T20 18 D20',117:'T20 17 D20',116:'T20 16 D20',115:'T20 15 D20',114:'T20 14 D20',
+  113:'T20 13 D20',112:'T20 12 D20',111:'T20 19 D16',110:'T20 18 D16',109:'T20 9 D20',
+  108:'T20 16 D16',107:'T19 18 D16',106:'T20 14 D16',105:'T20 13 D16',104:'T18 18 D16',
+  103:'T19 6 D20',102:'T20 10 D16',101:'T17 18 D16',100:'T20 D20',99:'T19 10 D16',
+  98:'T20 D19',97:'T19 D20',96:'T20 D18',95:'T19 D19',94:'T18 D20',93:'T19 D18',
+  92:'T20 D16',91:'T17 D20',90:'T18 D18',89:'T19 D16',88:'T16 D20',87:'T17 D18',
+  86:'T18 D16',85:'T15 D20',84:'T20 D12',83:'T17 D16',82:'T14 D20',81:'T19 D12',
+  80:'T20 D10',79:'T19 D11',78:'T18 D12',77:'T19 D10',76:'T20 D8',75:'T17 D12',
+  74:'T14 D16',73:'T19 D8',72:'T16 D12',71:'T13 D16',70:'T18 D8',69:'T19 D6',
+  68:'T20 D4',67:'T17 D8',66:'T10 D18',65:'T19 D4',64:'T16 D8',63:'T13 D12',
+  62:'T10 D16',61:'T15 D8',60:'20 D20',59:'19 D20',58:'18 D20',57:'17 D20',
+  56:'T16 D4',55:'15 D20',54:'14 D20',53:'13 D20',52:'T12 D8',51:'19 D16',
+  50:'DB',49:'17 D16',48:'16 D16',47:'15 D16',46:'6 D20',45:'13 D16',
+  44:'12 D16',43:'11 D16',42:'10 D16',41:'9 D16',40:'D20',39:'7 D16',
+  38:'D19',37:'5 D16',36:'D18',35:'3 D16',34:'D17',33:'1 D16',
+  32:'D16',31:'7 D12',30:'D15',29:'13 D8',28:'D14',27:'11 D8',
+  26:'D13',25:'9 D8',24:'D12',23:'7 D8',22:'D11',21:'5 D8',
+  20:'D10',19:'3 D8',18:'D9',17:'1 D8',16:'D8',15:'7 D4',
+  14:'D7',13:'5 D4',12:'D6',11:'3 D4',10:'D5',9:'1 D4',
+  8:'D4',7:'3 D2',6:'D3',5:'1 D2',4:'D2',3:'1 D1',2:'D1'
+};
+// Bogey / impossible checkouts in 3 darts.
+const BOGEY = new Set([169,168,166,165,163,162,159,1]);
+
+function standardCheckout(score){
+  if(STANDARD[score]) return STANDARD[score];
+  // fallback solver (shouldn't be needed for <=170 non-bogey)
+  for(const d of DOUBLES) if(d.v===score) return d.lbl;
+  for(const a of SETUP) for(const d of DOUBLES)
+    if(a.v+d.v===score && score<=170) return a.lbl+' '+d.lbl;
+  for(const a of SETUP) for(const b of SETUP) for(const d of DOUBLES)
+    if(a.v+b.v+d.v===score && score<=170) return a.lbl+' '+b.lbl+' '+d.lbl;
+  return null;
+}
+function isCheckoutable(score){
+  return score>=2 && score<=170 && !BOGEY.has(score) && standardCheckout(score)!==null;
+}
+function randomCheckout(range){
+  let lo=2,hi=170;
+  if(range==='easy'){lo=2;hi=60;}
+  else if(range==='mid'){lo=61;hi=120;}
+  else if(range==='big'){lo=121;hi=170;}
+  let s, guard=0;
+  do{ s=lo+rnd(hi-lo+1); guard++; }while(!isCheckoutable(s) && guard<500);
+  return s;
+}
+
+/* ----- Parse a user-entered checkout -------------------------------- */
+// Returns {ok, sum, finishesDouble, darts:[...]} or {error}
+function parseCheckout(str){
+  const toks = str.trim().toUpperCase().split(/[\s,]+/).filter(Boolean);
+  if(!toks.length) return {error:'empty'};
+  if(toks.length>3) return {error:'Max 3 darts.'};
+  let sum=0; let last=null; const darts=[];
+  for(const t of toks){
+    let m, v, dbl=false;
+    if(t==='DB'||t==='BULL'||t==='50'){ v=50; dbl=true; }
+    else if(t==='SB'||t==='B'||t==='25'){ v=25; dbl=false; }
+    else if((m=t.match(/^T(\d{1,2})$/))){ v=3*+m[1]; }
+    else if((m=t.match(/^D(\d{1,2})$/))){ const n=+m[1]; if(n<1||n>20) return {error:'Bad double '+t}; v=2*n; dbl=true; }
+    else if((m=t.match(/^S?(\d{1,2})$/))){ v=+m[1]; }
+    else return {error:'Unknown dart "'+t+'"'};
+    if(v===undefined) return {error:'Bad dart '+t};
+    sum+=v; last=dbl; darts.push({v,dbl});
+  }
+  // validate dart numbers in range
+  for(const d of darts){ if(d.v<0||d.v>60) return {error:'Out of range dart'}; }
+  return {ok:true, sum, finishesDouble:last, darts};
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stats                                                              */
+/* ------------------------------------------------------------------ */
+const S = JSON.parse(localStorage.getItem('dartsStats')||'null') || {correct:0,total:0,timeMs:0,timed:0,streak:0};
+function saveStats(){ localStorage.setItem('dartsStats', JSON.stringify(S)); renderStats(); }
+function renderStats(){
+  el('stCorrect').textContent=S.correct;
+  el('stTotal').textContent=S.total;
+  el('stAcc').textContent=(S.total? Math.round(100*S.correct/S.total):100)+'%';
+  el('stTime').textContent=(S.timed? (S.timeMs/S.timed/1000).toFixed(1):'—');
+  el('streakPill').textContent='Streak '+S.streak;
+}
+function record(ok, ms){
+  S.total++; if(ok){S.correct++; S.streak++;} else S.streak=0;
+  if(ms!=null){ S.timeMs+=ms; S.timed++; }
+  saveStats();
+}
+
+/* ------------------------------------------------------------------ */
+/*  DOM helpers + mode switching                                       */
+/* ------------------------------------------------------------------ */
+function el(id){return document.getElementById(id);}
+let mode='subtract';
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    mode=t.dataset.mode;
+    ['subtract','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
+    if(mode==='subtract') newSub();
+    if(mode==='checkout') newCo();
+    if(mode==='leg') newLeg(true);
+    focusActive();
+  };
+});
+function focusActive(){
+  if(mode==='subtract') el('subInput').focus();
+  if(mode==='checkout') el('coInput').focus();
+  if(mode==='leg') el('legInput').focus();
+}
+
+/* ------------------------------------------------------------------ */
+/*  SUBTRACT mode                                                      */
+/* ------------------------------------------------------------------ */
+let subState={};
+function newSub(){
+  const darts = +el('subDarts').value;
+  let score;
+  if(el('subChain').checked && subState.chainScore && subState.chainScore>2){
+    score = subState.chainScore;
+  } else {
+    score = pick([501,501,301,170,160,140,200,260,348,420]);
+  }
+  let visit = darts===1 ? randomDart() : randomVisit(score);
+  if(visit>score-2 && score-2>=0) visit=Math.min(visit, score-2);
+  subState={score, visit, answer:score-visit, t0:performance.now()};
+  el('subScore').textContent=score;
+  el('subVisit').textContent=visit;
+  const inp=el('subInput'); inp.value=''; inp.className='answer';
+  setHint('subHint','Type the score you have left.','info');
+  inp.focus();
+}
+function checkSub(){
+  const inp=el('subInput'); const val=inp.value.trim();
+  if(val==='') return;
+  const ms=performance.now()-subState.t0;
+  if(+val===subState.answer){
+    inp.className='answer good';
+    setHint('subHint','✓ Correct — '+subState.answer+' left',(subState.answer<=170?'good':'good'));
+    record(true,ms);
+    subState.chainScore=subState.answer;
+    setTimeout(newSub,650);
+  } else {
+    inp.className='answer bad';
+    setHint('subHint','✗ '+subState.score+' − '+subState.visit+' = '+subState.answer,'bad');
+    record(false,ms);
+    subState.chainScore=null;
+  }
+}
+el('subNext').onclick=newSub;
+el('subReveal').onclick=()=>{ setHint('subHint',subState.score+' − '+subState.visit+' = '+subState.answer,'info'); };
+el('subInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('subInput').className.includes('good')?newSub():checkSub()); });
+el('subDarts').onchange=newSub;
+
+/* ------------------------------------------------------------------ */
+/*  CHECKOUT mode                                                      */
+/* ------------------------------------------------------------------ */
+let coState={};
+function newCo(){
+  const score=randomCheckout(el('coRange').value);
+  coState={score, t0:performance.now()};
+  el('coScore').textContent=score;
+  el('coDarts').textContent = score<=40&&score%2===0 ? 'one dart finish possible' :
+                              (score<=110?'2–3 darts · finish on a double':'3 darts · finish on a double');
+  const inp=el('coInput'); inp.value=''; inp.className='answer';
+  setHint('coHint','Enter a finishing combination. Last dart must be a double.','info');
+  inp.focus();
+}
+function checkCo(){
+  const inp=el('coInput'); const raw=inp.value.trim();
+  if(raw==='') return;
+  const r=parseCheckout(raw);
+  if(r.error){ inp.className='answer bad'; setHint('coHint','✗ '+r.error,'bad'); return; }
+  const ms=performance.now()-coState.t0;
+  if(r.sum!==coState.score){
+    inp.className='answer bad';
+    setHint('coHint','✗ That sums to '+r.sum+', need '+coState.score,'bad');
+    record(false,ms);
+  } else if(!r.finishesDouble){
+    inp.className='answer bad';
+    setHint('coHint','✗ Sum is right but you must finish on a double','bad');
+    record(false,ms);
+  } else {
+    inp.className='answer good';
+    setHint('coHint','✓ Checkout! Standard: '+standardCheckout(coState.score),'good');
+    record(true,ms);
+    setTimeout(newCo,900);
+  }
+}
+el('coNext').onclick=newCo;
+el('coReveal').onclick=()=>{ setHint('coHint','Standard checkout: '+standardCheckout(coState.score),'info'); };
+el('coInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('coInput').className.includes('good')?newCo():checkCo()); });
+el('coRange').onchange=newCo;
+el('coShowChart').onchange=e=>{ el('chartCard').style.display=e.target.checked?'':'none'; };
+
+// build chart
+(function(){
+  const c=el('chart'); let html='';
+  for(let s=170;s>=2;s--){ if(STANDARD[s]) html+=`<div class="c"><span>${s}</span><b>${STANDARD[s]}</b></div>`; }
+  c.innerHTML=html;
+})();
+
+/* ------------------------------------------------------------------ */
+/*  FULL LEG mode                                                      */
+/* ------------------------------------------------------------------ */
+let leg={};
+function newLeg(reset){
+  if(reset||!leg.score){ leg={score:501, visit:1, dartsThrown:0, phase:'subtract'}; }
+  el('legVisit').textContent=leg.visit;
+  el('legDarts').textContent=leg.dartsThrown;
+  if(leg.score<=170 && isCheckoutable(leg.score)){
+    leg.phase='checkout';
+    el('legLabel').textContent='Close it out from';
+    el('legScore').textContent=leg.score;
+    el('legSub').innerHTML='Enter the finishing combo · finish on a double';
+    el('legInput').placeholder='e.g. T20 D... ';
+    el('legInput').setAttribute('autocapitalize','characters');
+    setHint('legHint','Checkout range! Type the combo to win the leg.','info');
+  } else {
+    leg.phase='subtract';
+    leg.thrown=randomVisit(leg.score);
+    leg.answer=leg.score-leg.thrown;
+    el('legLabel').textContent='Score on';
+    el('legScore').textContent=leg.score;
+    el('legSub').innerHTML='You threw <span class="visit">'+leg.thrown+'</span> this visit';
+    el('legInput').placeholder='remaining score';
+    el('legInput').setAttribute('autocapitalize','off');
+    setHint('legHint','Subtract this visit and enter what\'s left.','info');
+  }
+  const inp=el('legInput'); inp.value=''; inp.className='answer'; inp.focus();
+  leg.t0=performance.now();
+}
+function checkLeg(){
+  const inp=el('legInput'); const raw=inp.value.trim();
+  if(raw==='') return;
+  const ms=performance.now()-leg.t0;
+  if(leg.phase==='subtract'){
+    if(+raw===leg.answer){
+      inp.className='answer good';
+      setHint('legHint','✓ '+leg.answer+' left','good');
+      record(true,ms);
+      leg.score=leg.answer; leg.visit++; leg.dartsThrown+=3;
+      setTimeout(()=>newLeg(false),550);
+    } else {
+      inp.className='answer bad';
+      setHint('legHint','✗ '+leg.score+' − '+leg.thrown+' = '+leg.answer,'bad');
+      record(false,ms);
+    }
+  } else { // checkout
+    const r=parseCheckout(raw);
+    if(r.error){ inp.className='answer bad'; setHint('legHint','✗ '+r.error,'bad'); return; }
+    if(r.sum!==leg.score || !r.finishesDouble){
+      inp.className='answer bad';
+      const why = r.sum!==leg.score ? ('sums to '+r.sum+', need '+leg.score) : 'must finish on a double';
+      setHint('legHint','✗ '+why,'bad'); record(false,ms);
+    } else {
+      inp.className='answer good';
+      leg.dartsThrown+=r.darts.length;
+      setHint('legHint','🏆 Leg won in '+leg.dartsThrown+' darts! (std: '+standardCheckout(leg.score)+')','good');
+      record(true,ms);
+      setTimeout(()=>newLeg(true),1600);
+    }
+  }
+}
+el('legNext').onclick=checkLeg;
+el('legReveal').onclick=()=>{
+  if(leg.phase==='subtract') setHint('legHint',leg.score+' − '+leg.thrown+' = '+leg.answer,'info');
+  else setHint('legHint','Standard checkout: '+standardCheckout(leg.score),'info');
+};
+el('legInput').addEventListener('keydown',e=>{ if(e.key==='Enter') checkLeg(); });
+
+/* ------------------------------------------------------------------ */
+function setHint(id,msg,cls){ const h=el(id); h.textContent=msg; h.className='hint '+(cls||'info'); }
+el('resetStats').onclick=e=>{ e.preventDefault(); S.correct=S.total=S.timeMs=S.timed=S.streak=0; saveStats(); };
+
+/* init */
+renderStats(); newSub();
+</script>
+</body>
+</html>
