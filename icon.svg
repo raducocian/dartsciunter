@@ -1,39 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Darts Trainer">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#18202b"/>
-      <stop offset="1" stop-color="#0b0e13"/>
-    </linearGradient>
-    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#eef1f5"/>
-      <stop offset="1" stop-color="#9aa3ad"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Chalk">
+  <!-- rounded tile -->
+  <rect width="512" height="512" rx="114" fill="#11161d"/>
 
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-
-  <!-- dartboard -->
+  <!-- flat dartboard -->
   <g transform="translate(256,256)">
-    <circle r="176" fill="#10151c" stroke="#2b3442" stroke-width="8"/>
+    <circle r="160" fill="#0c1016"/>
     <circle r="150" fill="#2f8c4e"/>
-    <circle r="120" fill="#171c24"/>
-    <circle r="96"  fill="#c9362a"/>
-    <circle r="68"  fill="#171c24"/>
-    <circle r="40"  fill="#e7d9b4"/>
-    <circle r="19"  fill="#d33a2c"/>
-    <g stroke="#0b0e13" stroke-width="7" stroke-linecap="round">
-      <line x1="-176" y1="0" x2="176" y2="0"/>
-      <line x1="0" y1="-176" x2="0" y2="176"/>
-      <line x1="-124" y1="-124" x2="124" y2="124"/>
-      <line x1="-124" y1="124" x2="124" y2="-124"/>
+    <circle r="120" fill="#ece3cc"/>
+    <circle r="92"  fill="#2f8c4e"/>
+    <circle r="62"  fill="#ece3cc"/>
+    <circle r="32"  fill="#e53935"/>
+    <circle r="15"  fill="#b71c1c"/>
+    <!-- sector keylines -->
+    <g stroke="#0c1016" stroke-width="5" opacity="0.55">
+      <line x1="-150" y1="0" x2="150" y2="0"/>
+      <line x1="0" y1="-150" x2="0" y2="150"/>
+      <line x1="-106" y1="-106" x2="106" y2="106"/>
+      <line x1="-106" y1="106" x2="106" y2="-106"/>
     </g>
-    <circle r="19" fill="#d33a2c"/>
   </g>
 
-  <!-- dart striking the bull -->
+  <!-- flat dart, from the top-right into the bull -->
   <g transform="translate(256,256)">
-    <polygon points="-182,182 -127,171 -116,116 -171,127" fill="#21c07a" stroke="#189d63" stroke-width="3"/>
-    <line x1="-150" y1="150" x2="-20" y2="20" stroke="url(#steel)" stroke-width="20" stroke-linecap="round"/>
-    <polygon points="2,-2 -10,34 -34,10" fill="#eef1f5"/>
+    <!-- contrast halo -->
+    <line x1="150" y1="-150" x2="20" y2="-20" stroke="#11161d" stroke-width="38" stroke-linecap="round"/>
+    <!-- flight -->
+    <polygon points="182,-182 170,-130 118,-118 130,-170" fill="#21c07a" stroke="#178a52" stroke-width="3"/>
+    <!-- barrel -->
+    <line x1="150" y1="-150" x2="26" y2="-26" stroke="#cfd8dc" stroke-width="22" stroke-linecap="round"/>
+    <!-- point -->
+    <polygon points="0,0 35,-18 18,-35" fill="#eceff1"/>
   </g>
 </svg>
