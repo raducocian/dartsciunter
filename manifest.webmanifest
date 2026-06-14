@@ -1,7 +1,7 @@
 {
-  "name": "Darts Trainer",
-  "short_name": "Darts",
-  "description": "Practice darts counting: subtraction, additions and checkouts.",
+  "name": "Chalk — Darts Trainer",
+  "short_name": "Chalk",
+  "description": "Keep the score in your head: practice darts subtraction, additions and checkouts.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,12 +1,18 @@
-# 🎯 Darts Counter Trainer
+# 🎯 Chalk — Darts Trainer
 
-A self-contained web app to train two core darts-counting skills:
+*Keep the score in your head.* In darts, the **chalker** keeps score — this
+app trains you to be your own.
+
+A self-contained web app for the core darts-counting skills:
 
 - **Subtract** — quickly work out your remaining score after a visit (501 down).
-- **Closings** — practice the finishing combinations to close a leg on a double.
+- **Adds** — total three darts at a glance.
+- **Closings** — practice finishing combinations on a tappable dartboard.
 - **Full Leg** — play a whole 501 leg: subtract every visit, then check out.
 
-No build step, no dependencies — it's a single `index.html`.
+Daily progress and all settings are saved locally on your device. No build
+step and no runtime dependencies — just static `index.html`, `icon.svg` and a
+web manifest.
 
 ## Run it
 
