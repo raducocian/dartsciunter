@@ -159,12 +159,12 @@
       <div class="hint info" id="coHint">Tap the board to build your finish — last dart must be a double.</div>
       <div class="boardwrap"><svg id="board" viewBox="-210 -210 420 420" aria-label="dartboard"></svg></div>
       <div class="row">
-        <button class="btn alt" id="coUndo">⌫ Undo</button>
-        <button class="btn alt" id="coClear">Clear</button>
+        <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
+        <button type="button" class="btn alt" id="coClear">Clear</button>
       </div>
       <div class="row">
-        <button class="btn alt" id="coReveal">Reveal</button>
-        <button class="btn" id="coGo">Throw ▸</button>
+        <button type="button" class="btn alt" id="coReveal">Reveal</button>
+        <button type="button" class="btn" id="coGo">Throw ▸</button>
       </div>
     </div>
     <div class="opts">
@@ -512,8 +512,11 @@ function addDart(tok){
   if(coState.done || coTokens.length>=3) return;
   coTokens.push(tok); renderCombo(); updateCoInfo();
 }
-function undoDart(){ if(coState.done) return; coTokens.pop(); renderCombo(); updateCoInfo(); }
-function clearDarts(){ if(coState.done) return; coTokens=[]; renderCombo(); updateCoInfo(); }
+function reactivate(){ // re-open a round so the board is editable again after Throw/Reveal
+  if(coState.done){ coState.done=false; el('coGo').textContent='Throw ▸'; renderCoCoach(); }
+}
+function undoDart(){ reactivate(); coTokens.pop(); renderCombo(); updateCoInfo(); }
+function clearDarts(){ reactivate(); coTokens=[]; renderCombo(); updateCoInfo(); }
 function updateCoInfo(){
   if(!coTokens.length){ setHint('coHint','Tap the board to build your finish.','info'); return; }
   const r=parseCheckout(comboStr());
