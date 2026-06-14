@@ -1,34 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Chalk">
-  <!-- rounded tile -->
   <rect width="512" height="512" rx="114" fill="#11161d"/>
-
-  <!-- flat dartboard -->
   <g transform="translate(256,256)">
-    <circle r="160" fill="#0c1016"/>
-    <circle r="150" fill="#2f8c4e"/>
-    <circle r="120" fill="#ece3cc"/>
-    <circle r="92"  fill="#2f8c4e"/>
-    <circle r="62"  fill="#ece3cc"/>
-    <circle r="32"  fill="#e53935"/>
-    <circle r="15"  fill="#b71c1c"/>
-    <!-- sector keylines -->
-    <g stroke="#0c1016" stroke-width="5" opacity="0.55">
-      <line x1="-150" y1="0" x2="150" y2="0"/>
-      <line x1="0" y1="-150" x2="0" y2="150"/>
-      <line x1="-106" y1="-106" x2="106" y2="106"/>
-      <line x1="-106" y1="106" x2="106" y2="-106"/>
-    </g>
-  </g>
-
-  <!-- flat dart, from the top-right into the bull -->
-  <g transform="translate(256,256)">
-    <!-- contrast halo -->
-    <line x1="150" y1="-150" x2="20" y2="-20" stroke="#11161d" stroke-width="38" stroke-linecap="round"/>
-    <!-- flight -->
-    <polygon points="182,-182 170,-130 118,-118 130,-170" fill="#21c07a" stroke="#178a52" stroke-width="3"/>
-    <!-- barrel -->
-    <line x1="150" y1="-150" x2="26" y2="-26" stroke="#cfd8dc" stroke-width="22" stroke-linecap="round"/>
-    <!-- point -->
-    <polygon points="0,0 35,-18 18,-35" fill="#eceff1"/>
+    <circle r="168" fill="#2f8c4e"/>
+    <circle r="112" fill="#ece3cc"/>
+    <circle r="56"  fill="#e53935"/>
   </g>
 </svg>
