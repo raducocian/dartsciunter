@@ -18,8 +18,8 @@
   h1{font-size:20px;margin:0;letter-spacing:.3px}
   h1 .dot{color:var(--accent)}
   .tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:12px;margin-bottom:14px}
-  .tab{flex:1;text-align:center;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;
-    color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .tab{flex:1;text-align:center;padding:10px 4px;border-radius:9px;font-weight:600;font-size:13px;
+    color:var(--muted);cursor:pointer;user-select:none;transition:.15s;white-space:nowrap}
   .tab.active{background:var(--accent);color:#06150d}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
   .prompt{text-align:center;padding:6px 0 4px}
@@ -43,10 +43,13 @@
   .stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
   .stat .v{font-size:22px;font-weight:800}
   .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-  .key{padding:16px;border-radius:12px;background:var(--panel2);color:var(--txt);font-size:22px;border:1px solid var(--line)}
-  .key.act{background:var(--accent2);color:#04121f}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 0;max-width:320px;margin-left:auto;margin-right:auto}
+  .keypad.hidden{display:none}
+  .key{padding:12px 0;border-radius:11px;background:var(--panel2);color:var(--txt);font-size:22px;font-weight:700;
+    border:1px solid var(--line);cursor:pointer;-webkit-user-select:none;user-select:none}
+  .key:active{filter:brightness(1.35)}
   .key.del{background:#33202a;color:var(--bad)}
+  .key.ok{background:var(--accent);color:#06150d}
   .opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;color:var(--muted);font-size:14px}
   .opts label{display:flex;align-items:center;gap:6px;background:var(--panel2);padding:6px 10px;border-radius:9px;border:1px solid var(--line)}
   select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:14px;font-family:inherit}
@@ -107,6 +110,12 @@
   .pday .bar{height:100%;border-radius:6px;min-width:2px}
   .pday .v{width:104px;text-align:right;flex:0 0 auto;color:var(--txt);font-variant-numeric:tabular-nums}
   .pday.today .d{color:var(--accent);font-weight:800}
+  /* adds mode 3-dart display */
+  .darts3{display:flex;gap:10px;justify-content:center;margin:10px 0 4px}
+  .d3{flex:1;max-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 4px;font-size:30px;font-weight:800;text-align:center}
+  .d3.dbl{border-color:var(--accent);color:var(--accent)}
+  .d3.trb{border-color:var(--accent2);color:var(--accent2)}
   /* one-time session tip popup */
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92vw;width:max-content;
     background:var(--panel2);border:1px solid var(--accent);color:var(--txt);padding:12px 14px;border-radius:12px;
@@ -125,6 +134,7 @@
 
   <div class="tabs">
     <div class="tab active" data-mode="subtract">Subtract</div>
+    <div class="tab" data-mode="adds">Adds</div>
     <div class="tab" data-mode="checkout">Closings</div>
     <div class="tab" data-mode="leg">Full Leg</div>
   </div>
@@ -142,8 +152,8 @@
         <span class="m" id="subCoachM"></span>
         <span class="v" id="subCoachV"></span>
       </div>
-      <input class="answer" id="subInput" inputmode="numeric" placeholder="remaining score" />
-      <div class="hint info" id="subHint">Type the score you have left, then Enter.</div>
+      <input class="answer" id="subInput" inputmode="none" placeholder="remaining score" />
+      <div class="hint info" id="subHint">&nbsp;</div>
       <div class="row">
         <button class="btn alt" id="subReveal">Reveal</button>
         <button class="btn" id="subNext">New (Enter)</button>
@@ -154,6 +164,30 @@
         <select id="subDarts"><option value="3">3 (full visit)</option><option value="1">1 (single dart)</option></select>
       </label>
       <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
+    </div>
+  </section>
+
+  <!-- ============ ADDS ============ -->
+  <section id="m-adds" style="display:none">
+    <div class="card">
+      <div class="prompt">
+        <div class="label">Total the three darts</div>
+        <div class="darts3" id="addDarts"><span class="d3"></span><span class="d3"></span><span class="d3"></span></div>
+      </div>
+      <div class="coach hidden" id="addCoach">
+        <span class="k">Should be</span>
+        <span class="m" id="addCoachM"></span>
+        <span class="v" id="addCoachV"></span>
+      </div>
+      <input class="answer" id="addInput" inputmode="none" placeholder="3-dart total" />
+      <div class="hint info" id="addHint">&nbsp;</div>
+      <div class="row">
+        <button class="btn alt" id="addReveal">Reveal</button>
+        <button class="btn" id="addNext">New</button>
+      </div>
+    </div>
+    <div class="opts">
+      <label><input type="checkbox" id="addValues"> Show each dart's value</label>
     </div>
   </section>
 
@@ -214,7 +248,7 @@
         <span class="m" id="legCoachM"></span>
         <span class="v" id="legCoachV"></span>
       </div>
-      <input class="answer" id="legInput" placeholder="remaining score" autocomplete="off" />
+      <input class="answer" id="legInput" inputmode="none" placeholder="remaining score" autocomplete="off" />
       <div class="hint info" id="legHint">Subtract each visit. At ≤170 you'll be asked to close it out.</div>
       <div class="row">
         <button class="btn alt" id="legReveal">Reveal</button>
@@ -222,6 +256,21 @@
       </div>
     </div>
   </section>
+
+  <div id="keypad" class="keypad hidden">
+    <button type="button" class="key" data-k="1">1</button>
+    <button type="button" class="key" data-k="2">2</button>
+    <button type="button" class="key" data-k="3">3</button>
+    <button type="button" class="key" data-k="4">4</button>
+    <button type="button" class="key" data-k="5">5</button>
+    <button type="button" class="key" data-k="6">6</button>
+    <button type="button" class="key" data-k="7">7</button>
+    <button type="button" class="key" data-k="8">8</button>
+    <button type="button" class="key" data-k="9">9</button>
+    <button type="button" class="key del" data-k="del">⌫</button>
+    <button type="button" class="key" data-k="0">0</button>
+    <button type="button" class="key ok" data-k="ok">Enter</button>
+  </div>
 
   <div class="coachbar">
     <span class="cl"><b>💡 Coach panel</b> — show what it should be</span>
@@ -457,8 +506,17 @@ el('coachToggle').onchange = e=>{
 };
 function refreshCoach(){
   if(mode==='subtract') renderSubCoach();
+  if(mode==='adds') renderAddCoach();
   if(mode==='checkout') renderCoCoach();
   if(mode==='leg') renderLegCoach();
+}
+function renderAddCoach(force){
+  const c=el('addCoach');
+  if((coachOn||force) && addState.answer!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    el('addCoachM').textContent=addState.darts.map(d=>d.value).join(' + ')+' =';
+    el('addCoachV').textContent=addState.answer;
+  } else c.classList.add('hidden');
 }
 // force=true reveals the answer even when coach is off (Duolingo-style miss)
 function renderSubCoach(force){
@@ -491,17 +549,41 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     mode=t.dataset.mode;
-    ['subtract','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
+    ['subtract','adds','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
     if(mode==='subtract') newSub();
+    if(mode==='adds') newAdd();
     if(mode==='checkout') newCo();
     if(mode==='leg') newLeg(true);
+    updateKeypad();
     focusActive();
   };
 });
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
+  if(mode==='adds') el('addInput').focus();
   if(mode==='leg') el('legInput').focus();
 }
+
+/* ----- shared on-screen number keypad ----- */
+function currentNumInput(){
+  if(mode==='subtract') return el('subInput');
+  if(mode==='adds') return el('addInput');
+  if(mode==='leg' && leg.phase==='subtract') return el('legInput');
+  return null;
+}
+function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInput()); }
+function keypadSubmit(){
+  if(mode==='subtract') (el('subInput').className.includes('good')?newSub():checkSub());
+  else if(mode==='adds') (el('addInput').className.includes('good')?newAdd():checkAdd());
+  else if(mode==='leg') checkLeg();
+}
+el('keypad').addEventListener('click',e=>{
+  const b=e.target.closest('.key'); if(!b) return;
+  const k=b.dataset.k, inp=currentNumInput(); if(!inp) return;
+  if(k==='ok'){ keypadSubmit(); }
+  else if(k==='del'){ inp.value=inp.value.slice(0,-1); }
+  else if(inp.value.length<4){ inp.value+=k; }
+});
 
 /* ------------------------------------------------------------------ */
 /*  SUBTRACT mode                                                      */
@@ -521,7 +603,7 @@ function newSub(){
   el('subScore').textContent=score;
   el('subVisit').textContent=visit;
   const inp=el('subInput'); inp.value=''; inp.className='answer';
-  setHint('subHint','Type the score you have left.','info');
+  setHint('subHint',' ','info');
   renderSubCoach();
   inp.focus();
 }
@@ -547,6 +629,52 @@ el('subNext').onclick=newSub;
 el('subReveal').onclick=()=>{ setHint('subHint',subState.score+' − '+subState.visit+' = '+subState.answer,'info'); };
 el('subInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('subInput').className.includes('good')?newSub():checkSub()); });
 el('subDarts').onchange=newSub;
+
+/* ------------------------------------------------------------------ */
+/*  ADDS mode (total the three darts)                                  */
+/* ------------------------------------------------------------------ */
+let addState={};
+function randomDartLabel(){
+  const r=Math.random();
+  if(r<0.45){ const b=pick([20,20,20,19,18,17,16,15,14,13,10,7,5,1]); return {label:'T'+b, value:3*b, cls:'trb'}; }
+  if(r<0.60){ return pick([{label:'25',value:25,cls:''},{label:'Bull',value:50,cls:'dbl'},{label:'25',value:25,cls:''}]); }
+  if(r<0.75){ const b=pick([20,16,18,10,8,12,4,14,19]); return {label:'D'+b, value:2*b, cls:'dbl'}; }
+  const b=pick([20,19,18,17,16,15,13,12,10,9,7,5,3,1]); return {label:String(b), value:b, cls:''};
+}
+function newAdd(){
+  const darts=[randomDartLabel(),randomDartLabel(),randomDartLabel()];
+  addState={darts, answer:darts.reduce((s,d)=>s+d.value,0), t0:performance.now()};
+  const show=el('addValues').checked;
+  el('addDarts').querySelectorAll('.d3').forEach((sp,i)=>{
+    const d=darts[i]; sp.className='d3'+(d.cls?' '+d.cls:'');
+    sp.innerHTML = d.label + (show?`<div style="font-size:13px;color:var(--muted);font-weight:600;margin-top:3px">${d.value}</div>`:'');
+  });
+  const inp=el('addInput'); inp.value=''; inp.className='answer';
+  setHint('addHint',' ','info'); renderAddCoach(); inp.focus();
+}
+function checkAdd(){
+  const inp=el('addInput'); const val=inp.value.trim(); if(val==='') return;
+  const ms=performance.now()-addState.t0;
+  if(+val===addState.answer){
+    inp.className='answer good';
+    setHint('addHint','✓ Correct — '+addState.answer,'good');
+    record(true,ms); setTimeout(newAdd,650);
+  } else {
+    inp.className='answer bad';
+    setHint('addHint','✗ Not quite — see below','bad');
+    renderAddCoach(true); record(false,ms);
+  }
+}
+el('addNext').onclick=newAdd;
+el('addReveal').onclick=()=>{ setHint('addHint',addState.darts.map(d=>d.value).join(' + ')+' = '+addState.answer,'info'); };
+el('addInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('addInput').className.includes('good')?newAdd():checkAdd()); });
+el('addValues').onchange=()=>{ // re-render current darts with/without values
+  const show=el('addValues').checked;
+  el('addDarts').querySelectorAll('.d3').forEach((sp,i)=>{
+    const d=addState.darts&&addState.darts[i]; if(!d) return;
+    sp.innerHTML = d.label + (show?`<div style="font-size:13px;color:var(--muted);font-weight:600;margin-top:3px">${d.value}</div>`:'');
+  });
+};
 
 /* ------------------------------------------------------------------ */
 /*  CHECKOUT mode                                                      */
@@ -697,6 +825,7 @@ function newLeg(reset){
     el('legSub').innerHTML='Enter the finishing combo · finish on a double';
     el('legInput').placeholder='e.g. T20 D... ';
     el('legInput').setAttribute('autocapitalize','characters');
+    el('legInput').setAttribute('inputmode','text');   // letters needed -> allow native keyboard
     setHint('legHint','Checkout range! Type the combo to win the leg.','info');
   } else {
     leg.phase='subtract';
@@ -707,10 +836,12 @@ function newLeg(reset){
     el('legSub').innerHTML='You threw <span class="visit">'+leg.thrown+'</span> this visit';
     el('legInput').placeholder='remaining score';
     el('legInput').setAttribute('autocapitalize','off');
-    setHint('legHint','Subtract this visit and enter what\'s left.','info');
+    el('legInput').setAttribute('inputmode','none');   // numbers -> use on-screen keypad
+    setHint('legHint',' ','info');
   }
   const inp=el('legInput'); inp.value=''; inp.className='answer';
   renderLegCoach();
+  updateKeypad();
   inp.focus();
   leg.t0=performance.now();
 }
@@ -777,7 +908,7 @@ el('resetHistory').onclick=e=>{ e.preventDefault();
 };
 
 /* init */
-renderStats(); renderProgress(); newSub();
+renderStats(); renderProgress(); newSub(); updateKeypad();
 </script>
 </body>
 </html>
