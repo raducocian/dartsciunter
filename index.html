@@ -193,25 +193,27 @@
 
   <!-- ============ CHECKOUT ============ -->
   <section id="m-checkout" style="display:none">
-    <div class="card">
+    <div class="card" id="coHome">
       <div class="prompt">
         <div class="label">Checkout from</div>
         <div class="big" id="coScore">—</div>
       </div>
-      <div class="coach hidden" id="coCoach">
-        <span class="k">Should be</span>
-        <span class="v" id="coCoachV"></span>
-      </div>
-      <div class="combo" id="coCombo"></div>
-      <div class="hint info" id="coHint">&nbsp;</div>
-      <div class="boardwrap"><svg id="board" viewBox="-222 -222 444 444" aria-label="dartboard"></svg></div>
-      <div class="row">
-        <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
-        <button type="button" class="btn alt" id="coClear">Clear</button>
-      </div>
-      <div class="row">
-        <button type="button" class="btn alt" id="coReveal">Reveal</button>
-        <button type="button" class="btn" id="coGo">Throw ▸</button>
+      <div id="coTool">
+        <div class="coach hidden" id="coCoach">
+          <span class="k">Should be</span>
+          <span class="v" id="coCoachV"></span>
+        </div>
+        <div class="combo" id="coCombo"></div>
+        <div class="hint info" id="coHint">&nbsp;</div>
+        <div class="boardwrap"><svg id="board" viewBox="-222 -222 444 444" aria-label="dartboard"></svg></div>
+        <div class="row">
+          <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
+          <button type="button" class="btn alt" id="coClear">Clear</button>
+        </div>
+        <div class="row">
+          <button type="button" class="btn alt" id="coReveal">Reveal</button>
+          <button type="button" class="btn" id="coGo">Throw ▸</button>
+        </div>
       </div>
     </div>
     <div class="opts">
@@ -248,12 +250,15 @@
         <span class="m" id="legCoachM"></span>
         <span class="v" id="legCoachV"></span>
       </div>
-      <input class="answer" id="legInput" inputmode="none" placeholder="remaining score" autocomplete="off" />
-      <div class="hint info" id="legHint">Subtract each visit. At ≤170 you'll be asked to close it out.</div>
-      <div class="row">
-        <button class="btn alt" id="legReveal">Reveal</button>
-        <button class="btn" id="legNext">Confirm (Enter)</button>
+      <div id="legSubtractUI">
+        <input class="answer" id="legInput" inputmode="none" placeholder="remaining score" autocomplete="off" />
+        <div class="hint info" id="legHint">&nbsp;</div>
+        <div class="row">
+          <button class="btn alt" id="legReveal">Reveal</button>
+          <button class="btn" id="legNext">Confirm (Enter)</button>
+        </div>
       </div>
+      <div id="legBoardSlot"></div>
     </div>
   </section>
 
@@ -508,7 +513,7 @@ function refreshCoach(){
   if(mode==='subtract') renderSubCoach();
   if(mode==='adds') renderAddCoach();
   if(mode==='checkout') renderCoCoach();
-  if(mode==='leg') renderLegCoach();
+  if(mode==='leg') (leg.phase==='checkout'?renderCoCoach():renderLegCoach());
 }
 function renderAddCoach(force){
   const c=el('addCoach');
@@ -694,9 +699,16 @@ function renderCombo(){
     box.appendChild(s);
   });
 }
+function homeBoard(){ el('coHome').appendChild(el('coTool')); } // return the board tool to the Closings card
+function startLegCheckout(){ // use the same board to close out a leg, moved into the leg card
+  el('legBoardSlot').appendChild(el('coTool'));
+  coState={score:leg.score, t0:performance.now(), done:false, leg:true, won:false};
+  coTokens=[]; el('coGo').textContent='Throw ▸'; renderCombo(); setHint('coHint',' ','info'); renderCoCoach();
+}
 function newCo(){
+  homeBoard();
   const score=randomCheckout(el('coRange').value);
-  coState={score, t0:performance.now(), done:false};
+  coState={score, t0:performance.now(), done:false, leg:false};
   coTokens=[];
   el('coScore').textContent=score;
   el('coGo').textContent='Throw ▸';
@@ -725,29 +737,40 @@ function updateCoInfo(){
   else if(rem===1) setHint('coHint','1 left — can\'t finish on 1, Undo','bad');
   else setHint('coHint',rem+' left'+(coTokens.length>=3?' — out of darts (Throw to check)':' · finish on a double'),'info');
 }
+function coAdvance(){ // what "Next" does once a round is graded
+  if(coState.leg){ coState.won ? newLeg(true) : startLegCheckout(); }
+  else newCo();
+}
 function checkCo(){
-  if(coState.done){ newCo(); return; }
-  if(!coTokens.length){ setHint('coHint','Tap the board first.','info'); return; }
+  if(coState.done){ coAdvance(); return; }
+  if(!coTokens.length){ return; }
   const r=parseCheckout(comboStr());
   if(r.error){ setHint('coHint','✗ '+r.error,'bad'); return; }
   const ms=performance.now()-coState.t0;
-  if(r.sum!==coState.score){
-    setHint('coHint','✗ That sums to '+r.sum+', need '+coState.score,'bad');
-    renderCoCoach(true); record(false,ms); coState.done=true; el('coGo').textContent='Next ▸';
-  } else if(!r.finishesDouble){
-    setHint('coHint','✗ Sum is right but you must finish on a double','bad');
-    renderCoCoach(true); record(false,ms); coState.done=true; el('coGo').textContent='Next ▸';
-  } else {
-    setHint('coHint','✓ Checkout! Standard: '+standardCheckout(coState.score),'good');
-    record(true,ms); coState.done=true; el('coGo').textContent='Next ▸';
-    setTimeout(()=>{ if(coState.done) newCo(); },1100);
+  const fail=lbl=>{ setHint('coHint','✗ '+lbl,'bad'); renderCoCoach(true); record(false,ms);
+    coState.done=true; coState.won=false; el('coGo').textContent=coState.leg?'Retry ▸':'Next ▸'; };
+  if(r.sum!==coState.score) fail('That sums to '+r.sum+', need '+coState.score);
+  else if(!r.finishesDouble) fail('Sum is right but you must finish on a double');
+  else {
+    record(true,ms); coState.done=true; coState.won=true; el('coGo').textContent='Next ▸';
+    if(coState.leg){
+      leg.dartsThrown+=r.darts.length;
+      setHint('coHint','🏆 Leg won in '+leg.dartsThrown+' darts! (std: '+standardCheckout(coState.score)+')','good');
+      setTimeout(()=>{ if(coState.done&&coState.won) newLeg(true); },1700);
+    } else {
+      setHint('coHint','✓ Checkout! Standard: '+standardCheckout(coState.score),'good');
+      setTimeout(()=>{ if(coState.done&&coState.won) newCo(); },1100);
+    }
   }
 }
 el('coGo').onclick=checkCo;
 el('coUndo').onclick=undoDart;
 el('coClear').onclick=clearDarts;
-el('coReveal').onclick=()=>{ setHint('coHint','Standard checkout: '+standardCheckout(coState.score),'info'); coState.done=true; el('coGo').textContent='Next ▸'; };
-document.addEventListener('keydown',e=>{ if(mode==='checkout' && e.key==='Enter'){ e.preventDefault(); checkCo(); } });
+el('coReveal').onclick=()=>{ setHint('coHint','Standard checkout: '+standardCheckout(coState.score),'info'); coState.done=true; coState.won=false; el('coGo').textContent=coState.leg?'Retry ▸':'Next ▸'; };
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return;
+  if(mode==='checkout'){ e.preventDefault(); checkCo(); }
+  else if(mode==='leg' && leg.phase==='checkout'){ e.preventDefault(); checkCo(); }
+});
 el('coRange').onchange=newCo;
 
 /* ----- Build the dartboard SVG ------------------------------------- */
@@ -822,67 +845,48 @@ function newLeg(reset){
     leg.phase='checkout';
     el('legLabel').textContent='Close it out from';
     el('legScore').textContent=leg.score;
-    el('legSub').innerHTML='Enter the finishing combo · finish on a double';
-    el('legInput').placeholder='e.g. T20 D... ';
-    el('legInput').setAttribute('autocapitalize','characters');
-    el('legInput').setAttribute('inputmode','text');   // letters needed -> allow native keyboard
-    setHint('legHint','Checkout range! Type the combo to win the leg.','info');
+    el('legSub').innerHTML='Tap the board to win the leg · finish on a double';
+    el('legSubtractUI').style.display='none';
+    el('legCoach').classList.add('hidden');
+    startLegCheckout();        // move & arm the dartboard inside the leg card
   } else {
     leg.phase='subtract';
+    homeBoard();               // send the board back to the Closings card
+    el('legSubtractUI').style.display='';
     leg.thrown=randomVisit(leg.score);
     leg.answer=leg.score-leg.thrown;
     el('legLabel').textContent='Score on';
     el('legScore').textContent=leg.score;
     el('legSub').innerHTML='You threw <span class="visit">'+leg.thrown+'</span> this visit';
     el('legInput').placeholder='remaining score';
-    el('legInput').setAttribute('autocapitalize','off');
-    el('legInput').setAttribute('inputmode','none');   // numbers -> use on-screen keypad
+    const inp=el('legInput'); inp.value=''; inp.className='answer';
     setHint('legHint',' ','info');
+    renderLegCoach();
+    inp.focus();
   }
-  const inp=el('legInput'); inp.value=''; inp.className='answer';
-  renderLegCoach();
   updateKeypad();
-  inp.focus();
   leg.t0=performance.now();
 }
-function checkLeg(){
+function checkLeg(){ // subtract phase only; the checkout phase uses the dartboard (checkCo)
+  if(leg.phase!=='subtract') return;
   const inp=el('legInput'); const raw=inp.value.trim();
   if(raw==='') return;
   const ms=performance.now()-leg.t0;
-  if(leg.phase==='subtract'){
-    if(+raw===leg.answer){
-      inp.className='answer good';
-      setHint('legHint','✓ '+leg.answer+' left','good');
-      record(true,ms);
-      leg.score=leg.answer; leg.visit++; leg.dartsThrown+=3;
-      setTimeout(()=>newLeg(false),550);
-    } else {
-      inp.className='answer bad';
-      setHint('legHint','✗ Not quite — see below','bad');
-      renderLegCoach(true);
-      record(false,ms);
-    }
-  } else { // checkout
-    const r=parseCheckout(raw);
-    if(r.error){ inp.className='answer bad'; setHint('legHint','✗ '+r.error,'bad'); return; }
-    if(r.sum!==leg.score || !r.finishesDouble){
-      inp.className='answer bad';
-      const why = r.sum!==leg.score ? ('sums to '+r.sum+', need '+leg.score) : 'must finish on a double';
-      setHint('legHint','✗ '+why,'bad'); renderLegCoach(true); record(false,ms);
-    } else {
-      inp.className='answer good';
-      leg.dartsThrown+=r.darts.length;
-      setHint('legHint','🏆 Leg won in '+leg.dartsThrown+' darts! (std: '+standardCheckout(leg.score)+')','good');
-      record(true,ms);
-      setTimeout(()=>newLeg(true),1600);
-    }
+  if(+raw===leg.answer){
+    inp.className='answer good';
+    setHint('legHint','✓ '+leg.answer+' left','good');
+    record(true,ms);
+    leg.score=leg.answer; leg.visit++; leg.dartsThrown+=3;
+    setTimeout(()=>newLeg(false),550);
+  } else {
+    inp.className='answer bad';
+    setHint('legHint','✗ Not quite — see below','bad');
+    renderLegCoach(true);
+    record(false,ms);
   }
 }
 el('legNext').onclick=checkLeg;
-el('legReveal').onclick=()=>{
-  if(leg.phase==='subtract') setHint('legHint',leg.score+' − '+leg.thrown+' = '+leg.answer,'info');
-  else setHint('legHint','Standard checkout: '+standardCheckout(leg.score),'info');
-};
+el('legReveal').onclick=()=> setHint('legHint',leg.score+' − '+leg.thrown+' = '+leg.answer,'info');
 el('legInput').addEventListener('keydown',e=>{ if(e.key==='Enter') checkLeg(); });
 
 /* ------------------------------------------------------------------ */
