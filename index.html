@@ -225,7 +225,7 @@
         </div>
         <div class="combo" id="coCombo"></div>
         <div class="hint info" id="coHint">&nbsp;</div>
-        <div class="boardwrap"><svg id="board" viewBox="-222 -222 444 444" aria-label="dartboard"></svg></div>
+        <div class="boardwrap"><svg id="board" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="row">
           <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
           <button type="button" class="btn alt" id="coClear">Clear</button>
@@ -853,7 +853,7 @@ el('coRange').onchange=()=>{ SETTINGS.coRange=el('coRange').value; saveSettings(
   });
   // numbers around the outside
   order.forEach((n,i)=>{
-    const [x,y]=pt(i*18, R.dout+16);
+    const [x,y]=pt(i*18, R.dout+32);
     const t=document.createElementNS(NS,'text'); t.setAttribute('class','num');
     t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=n;
     t.addEventListener('click',()=>{ flash(t); addDart(String(n)); });
