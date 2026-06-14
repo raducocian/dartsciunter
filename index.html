@@ -28,10 +28,12 @@
   h1{font-size:22px;margin:0;letter-spacing:.3px;line-height:1}
   h1 .dot{color:var(--accent)}
   .tagline{font-size:11px;color:var(--muted);letter-spacing:.4px;margin-top:2px}
-  .tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:12px;margin-bottom:14px}
-  .tab{flex:1;text-align:center;padding:10px 4px;border-radius:9px;font-weight:600;font-size:13px;
-    color:var(--muted);cursor:pointer;user-select:none;transition:.15s;white-space:nowrap}
-  .tab.active{background:var(--btn);color:var(--btnink)}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .tab{flex:1;text-align:center;padding:11px 4px;font-weight:600;font-size:13px;
+    color:var(--muted);cursor:pointer;user-select:none;transition:.15s;white-space:nowrap;
+    border-bottom:2.5px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--txt);border-bottom-color:var(--btn)}
+  .tab:active{color:var(--txt)}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
   .prompt{text-align:center;padding:6px 0 4px}
   .prompt .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px}
@@ -62,8 +64,8 @@
   .key{padding:12px 0;border-radius:11px;background:var(--panel2);color:var(--txt);font-size:22px;font-weight:700;
     border:1px solid var(--line);cursor:pointer;-webkit-user-select:none;user-select:none}
   .key:active{filter:brightness(1.35)}
-  .key.del{background:#33202a;color:var(--bad)}
-  .key.ok{background:var(--btn);color:var(--btnink)}
+  .key.del{background:rgba(255,90,90,.16);color:#ff9d9d}
+  .key.ok{background:rgba(33,192,122,.18);color:#7fe3b0}
   .opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;color:var(--muted);font-size:14px}
   .opts label{display:flex;align-items:center;gap:6px;background:var(--panel2);padding:6px 10px;border-radius:9px;border:1px solid var(--line)}
   select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:14px;font-family:inherit}
@@ -173,7 +175,7 @@
       <div class="hint info" id="subHint">&nbsp;</div>
       <div class="row">
         <button class="btn alt" id="subReveal">Reveal</button>
-        <button class="btn" id="subNext">New (Enter)</button>
+        <button class="btn alt" id="subNext">New</button>
       </div>
     </div>
     <div class="opts">
@@ -200,7 +202,7 @@
       <div class="hint info" id="addHint">&nbsp;</div>
       <div class="row">
         <button class="btn alt" id="addReveal">Reveal</button>
-        <button class="btn" id="addNext">New</button>
+        <button class="btn alt" id="addNext">New</button>
       </div>
     </div>
     <div class="opts">
@@ -272,7 +274,7 @@
         <div class="hint info" id="legHint">&nbsp;</div>
         <div class="row">
           <button class="btn alt" id="legReveal">Reveal</button>
-          <button class="btn" id="legNext">Confirm (Enter)</button>
+          <button class="btn alt" id="legNext">Confirm</button>
         </div>
       </div>
       <div id="legBoardSlot"></div>
