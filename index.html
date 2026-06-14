@@ -107,6 +107,13 @@
   .pday .bar{height:100%;border-radius:6px;min-width:2px}
   .pday .v{width:104px;text-align:right;flex:0 0 auto;color:var(--txt);font-variant-numeric:tabular-nums}
   .pday.today .d{color:var(--accent);font-weight:800}
+  /* one-time session tip popup */
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92vw;width:max-content;
+    background:var(--panel2);border:1px solid var(--accent);color:var(--txt);padding:12px 14px;border-radius:12px;
+    font-size:14px;line-height:1.4;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.55);display:flex;gap:12px;align-items:flex-start;
+    animation:toastin .25s ease}
+  @keyframes toastin{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+  .toast .close{color:var(--muted);font-weight:800;cursor:pointer;flex:0 0 auto;font-size:16px;line-height:1}
 </style>
 </head>
 <body>
@@ -162,7 +169,7 @@
         <span class="v" id="coCoachV"></span>
       </div>
       <div class="combo" id="coCombo"></div>
-      <div class="hint info" id="coHint">Tap the board to build your finish — last dart must be a double.</div>
+      <div class="hint info" id="coHint">&nbsp;</div>
       <div class="boardwrap"><svg id="board" viewBox="-222 -222 444 444" aria-label="dartboard"></svg></div>
       <div class="row">
         <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
@@ -239,6 +246,8 @@
 
   <p class="note" style="text-align:center">All stats are saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a> · type answer + <span class="kbd">Enter</span></p>
 </div>
+
+<div id="toast" class="toast" style="display:none"></div>
 
 <script>
 /* ------------------------------------------------------------------ */
@@ -564,8 +573,9 @@ function newCo(){
   el('coScore').textContent=score;
   el('coGo').textContent='Throw ▸';
   renderCombo();
-  setHint('coHint','Tap the board to build your finish — last dart must be a double.','info');
+  setHint('coHint',' ','info');
   renderCoCoach();
+  sessionTip();
 }
 function addDart(tok){
   if(coState.done || coTokens.length>=3) return;
@@ -577,7 +587,7 @@ function reactivate(){ // re-open a round so the board is editable again after T
 function undoDart(){ reactivate(); coTokens.pop(); renderCombo(); updateCoInfo(); }
 function clearDarts(){ reactivate(); coTokens=[]; renderCombo(); updateCoInfo(); }
 function updateCoInfo(){
-  if(!coTokens.length){ setHint('coHint','Tap the board to build your finish.','info'); return; }
+  if(!coTokens.length){ setHint('coHint',' ','info'); return; }
   const r=parseCheckout(comboStr());
   if(r.error){ setHint('coHint',r.error,'bad'); return; }
   const rem=coState.score-r.sum;
@@ -746,6 +756,19 @@ el('legInput').addEventListener('keydown',e=>{ if(e.key==='Enter') checkLeg(); }
 
 /* ------------------------------------------------------------------ */
 function setHint(id,msg,cls){ const h=el(id); h.textContent=msg; h.className='hint '+(cls||'info'); }
+
+/* one-time-per-session tip popup for the Closings board */
+function showToast(html, ms){
+  const t=el('toast'); t.innerHTML='<div>'+html+'</div><span class="close">✕</span>';
+  t.style.display='flex';
+  const hide=()=>{ t.style.display='none'; };
+  t.onclick=hide;
+  if(ms) setTimeout(hide, ms);
+}
+function sessionTip(){
+  try{ if(sessionStorage.getItem('coTip')) return; sessionStorage.setItem('coTip','1'); }catch(e){}
+  showToast('🎯 Tap the board to build your finish in up to 3 darts — the last dart must be a <b>double</b>. Tap a rim number for a single. <i>(tap to dismiss)</i>', 7000);
+}
 el('resetStats').onclick=e=>{ e.preventDefault(); S.correct=S.total=S.timeMs=S.timed=S.streak=0; saveStats(); };
 el('resetHistory').onclick=e=>{ e.preventDefault();
   if(confirm('Clear your daily progress history? (running totals are kept)')){
