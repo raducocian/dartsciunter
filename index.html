@@ -101,6 +101,7 @@
   .coach.hidden{display:none}
   /* dartboard */
   .boardwrap{display:flex;justify-content:center;margin:6px 0 18px}
+  svg#board.off{pointer-events:none;opacity:.38;filter:grayscale(.35)}
   svg#board{width:320px;height:320px;max-width:88vw;max-height:88vw;touch-action:manipulation;
     background:#0b0e13;border-radius:50%;box-shadow:0 0 0 10px #15110c, 0 0 0 13px #2a2118}
   #board path,#board circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
@@ -730,7 +731,7 @@ function homeBoard(){ el('coHome').appendChild(el('coTool')); } // return the bo
 function startLegCheckout(){ // use the same board to close out a leg, moved into the leg card
   el('legBoardSlot').appendChild(el('coTool'));
   coState={score:leg.score, t0:performance.now(), done:false, leg:true, won:false};
-  coTokens=[]; el('coGo').textContent='Throw ▸'; renderCombo(); setHint('coHint',' ','info'); setClearAttn(false); renderCoCoach();
+  coTokens=[]; el('coGo').textContent='Throw ▸'; renderCombo(); setHint('coHint',' ','info'); setStuck(false); renderCoCoach();
 }
 function newCo(){
   homeBoard();
@@ -741,7 +742,7 @@ function newCo(){
   el('coGo').textContent='Throw ▸';
   renderCombo();
   setHint('coHint',' ','info');
-  setClearAttn(false);
+  setStuck(false);
   renderCoCoach();
   sessionTip();
 }
@@ -754,14 +755,17 @@ function addDart(tok){
 }
 function reactivate(){ // re-open a round so the board is editable again after Throw/Reveal
   if(coState.done){ coState.done=false; el('coGo').textContent='Throw ▸'; renderCoCoach(); }
+  setBoardDisabled(false);
 }
 function undoDart(){ reactivate(); coTokens.pop(); renderCombo(); updateCoInfo(); }
 function clearDarts(){ reactivate(); coTokens=[]; renderCombo(); updateCoInfo(); }
 function setClearAttn(on){ el('coClear').classList.toggle('attn', !!on); }
+function setBoardDisabled(on){ el('board').classList.toggle('off', !!on); }
+function setStuck(on){ setClearAttn(on); setBoardDisabled(on); } // can't proceed -> dim board + light Clear
 function updateCoInfo(){
-  if(!coTokens.length){ setHint('coHint',' ','info'); setClearAttn(false); return; }
+  if(!coTokens.length){ setHint('coHint',' ','info'); setStuck(false); return; }
   const r=parseCheckout(comboStr());
-  if(r.error){ setHint('coHint',r.error,'bad'); setClearAttn(true); return; }
+  if(r.error){ setHint('coHint',r.error,'bad'); setStuck(true); return; }
   const rem=coState.score-r.sum;
   let stuck=false;
   if(rem<0){ setHint('coHint','Bust by '+(-rem)+' — Clear to retry','bad'); stuck=true; }
@@ -770,7 +774,7 @@ function updateCoInfo(){
   else if(rem===1){ setHint('coHint','1 left — can\'t finish on 1, Clear to retry','bad'); stuck=true; }
   else if(coTokens.length>=3){ setHint('coHint',rem+' left — out of darts, Clear to retry','bad'); stuck=true; }
   else setHint('coHint',rem+' left · finish on a double','info');
-  setClearAttn(stuck);
+  setStuck(stuck);
 }
 function coAdvance(){ // what "Next" does once a round is graded
   if(coState.leg){ coState.won ? newLeg(true) : startLegCheckout(); }
@@ -782,12 +786,12 @@ function checkCo(){
   const r=parseCheckout(comboStr());
   if(r.error){ setHint('coHint','✗ '+r.error,'bad'); return; }
   const ms=performance.now()-coState.t0;
-  const fail=lbl=>{ setHint('coHint','✗ '+lbl,'bad'); renderCoCoach(true); record(false,ms); setClearAttn(false);
+  const fail=lbl=>{ setHint('coHint','✗ '+lbl,'bad'); renderCoCoach(true); record(false,ms); setClearAttn(false); setBoardDisabled(true);
     coState.done=true; coState.won=false; el('coGo').textContent=coState.leg?'Retry ▸':'Next ▸'; };
   if(r.sum!==coState.score) fail('That sums to '+r.sum+', need '+coState.score);
   else if(!r.finishesDouble) fail('Sum is right but you must finish on a double');
   else {
-    record(true,ms); coState.done=true; coState.won=true; el('coGo').textContent='Next ▸'; setClearAttn(false);
+    record(true,ms); coState.done=true; coState.won=true; el('coGo').textContent='Next ▸'; setClearAttn(false); setBoardDisabled(true);
     if(coState.leg){
       leg.dartsThrown+=r.darts.length;
       setHint('coHint','🏆 Leg won in '+leg.dartsThrown+' darts! (std: '+standardCheckout(coState.score)+')','good');
