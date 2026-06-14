@@ -80,6 +80,20 @@
   .coach .v{font-size:22px;font-weight:800;color:var(--txt)}
   .coach .m{color:var(--muted);font-size:15px}
   .coach.hidden{display:none}
+  /* dartboard */
+  .boardwrap{display:flex;justify-content:center;margin:6px 0 12px}
+  svg#board{width:320px;height:320px;max-width:88vw;max-height:88vw;touch-action:manipulation;
+    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 10px #15110c, 0 0 0 13px #2a2118}
+  #board path,#board circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
+  #board path:active,#board circle:active,#board path.flash,#board circle.flash{filter:brightness(1.5)}
+  #board .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
+  #board .num{fill:#f0e9d6;font-size:20px;font-weight:800;pointer-events:none;text-anchor:middle;
+    dominant-baseline:central;font-family:Arial,Helvetica,sans-serif}
+  .combo{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;min-height:34px;align-items:center;margin-bottom:6px}
+  .combo .empty{color:var(--muted);font-size:14px}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:5px 12px;font-weight:800;font-size:18px}
+  .chip.dbl{border-color:var(--accent);color:var(--accent)}
+  .chip.trb{border-color:var(--accent2);color:var(--accent2)}
 </style>
 </head>
 <body>
@@ -141,11 +155,16 @@
         <span class="k">Should be</span>
         <span class="v" id="coCoachV"></span>
       </div>
-      <input class="answer" id="coInput" placeholder="e.g. T20 T20 DB  or  40 D... " autocapitalize="characters" autocomplete="off" />
-      <div class="hint info" id="coHint">Enter a finishing combination. Last dart must be a double.</div>
+      <div class="combo" id="coCombo"></div>
+      <div class="hint info" id="coHint">Tap the board to build your finish — last dart must be a double.</div>
+      <div class="boardwrap"><svg id="board" viewBox="-210 -210 420 420" aria-label="dartboard"></svg></div>
+      <div class="row">
+        <button class="btn alt" id="coUndo">⌫ Undo</button>
+        <button class="btn alt" id="coClear">Clear</button>
+      </div>
       <div class="row">
         <button class="btn alt" id="coReveal">Reveal</button>
-        <button class="btn" id="coNext">New (Enter)</button>
+        <button class="btn" id="coGo">Throw ▸</button>
       </div>
     </div>
     <div class="opts">
@@ -159,7 +178,7 @@
       </label>
       <label><input type="checkbox" id="coShowChart"> Show chart</label>
     </div>
-    <p class="note">Notation: <span class="kbd">T20</span> treble, <span class="kbd">D16</span> double, <span class="kbd">20</span> single, <span class="kbd">DB</span> double-bull (50), <span class="kbd">SB</span> single-bull (25). Separate darts with spaces. Any valid checkout is accepted — Reveal shows a standard one.</p>
+    <p class="note">Tap a board segment to add a dart: the thin outer ring is the <b>double</b>, the thin inner ring is the <b>treble</b>, the big areas are <b>singles</b>, the green ring is <b>25</b> and the red centre is <b>bull (50)</b>. Build up to 3 darts, finish on a double, then <b>Throw</b>. Any valid checkout counts — Reveal shows a standard one.</p>
     <div class="card" id="chartCard" style="display:none">
       <div class="label" style="color:var(--muted);margin-bottom:8px;letter-spacing:1px">STANDARD CHECKOUT CHART</div>
       <div class="chart" id="chart"></div>
@@ -413,7 +432,6 @@ document.querySelectorAll('.tab').forEach(t=>{
 });
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
-  if(mode==='checkout') el('coInput').focus();
   if(mode==='leg') el('legInput').focus();
 }
 
@@ -465,45 +483,121 @@ el('subDarts').onchange=newSub;
 /* ------------------------------------------------------------------ */
 /*  CHECKOUT mode                                                      */
 /* ------------------------------------------------------------------ */
-let coState={};
+let coState={}, coTokens=[];
+function comboStr(){ return coTokens.join(' '); }
+function renderCombo(){
+  const box=el('coCombo'); box.innerHTML='';
+  if(!coTokens.length){ const e=document.createElement('span'); e.className='empty'; e.textContent='no darts yet — tap the board'; box.appendChild(e); return; }
+  coTokens.forEach(t=>{
+    const s=document.createElement('span');
+    const dbl=/^D/.test(t)||t==='DB', trb=/^T/.test(t);
+    s.className='chip'+(dbl?' dbl':'')+(trb?' trb':'');
+    s.textContent=t;
+    box.appendChild(s);
+  });
+}
 function newCo(){
   const score=randomCheckout(el('coRange').value);
-  coState={score, t0:performance.now()};
+  coState={score, t0:performance.now(), done:false};
+  coTokens=[];
   el('coScore').textContent=score;
   el('coDarts').textContent = score<=40&&score%2===0 ? 'one dart finish possible' :
                               (score<=110?'2–3 darts · finish on a double':'3 darts · finish on a double');
-  const inp=el('coInput'); inp.value=''; inp.className='answer';
-  setHint('coHint','Enter a finishing combination. Last dart must be a double.','info');
+  el('coGo').textContent='Throw ▸';
+  renderCombo();
+  setHint('coHint','Tap the board to build your finish — last dart must be a double.','info');
   renderCoCoach();
-  inp.focus();
+}
+function addDart(tok){
+  if(coState.done || coTokens.length>=3) return;
+  coTokens.push(tok); renderCombo(); updateCoInfo();
+}
+function undoDart(){ if(coState.done) return; coTokens.pop(); renderCombo(); updateCoInfo(); }
+function clearDarts(){ if(coState.done) return; coTokens=[]; renderCombo(); updateCoInfo(); }
+function updateCoInfo(){
+  if(!coTokens.length){ setHint('coHint','Tap the board to build your finish.','info'); return; }
+  const r=parseCheckout(comboStr());
+  if(r.error){ setHint('coHint',r.error,'bad'); return; }
+  const rem=coState.score-r.sum;
+  if(rem<0) setHint('coHint','Bust by '+(-rem)+' — Undo or Clear','bad');
+  else if(rem===0 && r.finishesDouble) setHint('coHint','✓ That checks out — press Throw','good');
+  else if(rem===0) setHint('coHint','On zero but not a double — Undo','bad');
+  else if(rem===1) setHint('coHint','1 left — can\'t finish on 1, Undo','bad');
+  else setHint('coHint',rem+' left'+(coTokens.length>=3?' — out of darts (Throw to check)':' · finish on a double'),'info');
 }
 function checkCo(){
-  const inp=el('coInput'); const raw=inp.value.trim();
-  if(raw==='') return;
-  const r=parseCheckout(raw);
-  if(r.error){ inp.className='answer bad'; setHint('coHint','✗ '+r.error,'bad'); return; }
+  if(coState.done){ newCo(); return; }
+  if(!coTokens.length){ setHint('coHint','Tap the board first.','info'); return; }
+  const r=parseCheckout(comboStr());
+  if(r.error){ setHint('coHint','✗ '+r.error,'bad'); return; }
   const ms=performance.now()-coState.t0;
   if(r.sum!==coState.score){
-    inp.className='answer bad';
     setHint('coHint','✗ That sums to '+r.sum+', need '+coState.score,'bad');
-    renderCoCoach(true);
-    record(false,ms);
+    renderCoCoach(true); record(false,ms); coState.done=true; el('coGo').textContent='Next ▸';
   } else if(!r.finishesDouble){
-    inp.className='answer bad';
     setHint('coHint','✗ Sum is right but you must finish on a double','bad');
-    renderCoCoach(true);
-    record(false,ms);
+    renderCoCoach(true); record(false,ms); coState.done=true; el('coGo').textContent='Next ▸';
   } else {
-    inp.className='answer good';
     setHint('coHint','✓ Checkout! Standard: '+standardCheckout(coState.score),'good');
-    record(true,ms);
-    setTimeout(newCo,900);
+    record(true,ms); coState.done=true; el('coGo').textContent='Next ▸';
+    setTimeout(()=>{ if(coState.done) newCo(); },1100);
   }
 }
-el('coNext').onclick=newCo;
-el('coReveal').onclick=()=>{ setHint('coHint','Standard checkout: '+standardCheckout(coState.score),'info'); };
-el('coInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('coInput').className.includes('good')?newCo():checkCo()); });
+el('coGo').onclick=checkCo;
+el('coUndo').onclick=undoDart;
+el('coClear').onclick=clearDarts;
+el('coReveal').onclick=()=>{ setHint('coHint','Standard checkout: '+standardCheckout(coState.score),'info'); coState.done=true; el('coGo').textContent='Next ▸'; };
+document.addEventListener('keydown',e=>{ if(mode==='checkout' && e.key==='Enter'){ e.preventDefault(); checkCo(); } });
 el('coRange').onchange=newCo;
+
+/* ----- Build the dartboard SVG ------------------------------------- */
+(function buildBoard(){
+  const svg=el('board');
+  const order=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+  const NS='http://www.w3.org/2000/svg';
+  const R={ ibull:13, obull:32, sin:106, tin:122, sout:170, dout:186 };
+  const BLACK='#27241d', CREAM='#e7d9b4', RED='#c9362a', GREEN='#2f8c4e';
+  // top-clockwise angle θ (deg) -> screen coords
+  const pt=(deg,r)=>{ const a=deg*Math.PI/180; return [ (r*Math.sin(a)).toFixed(2), (-r*Math.cos(a)).toFixed(2) ]; };
+  function ringSeg(ri,ro,a0,a1){
+    const [x1,y1]=pt(a0,ri), [x2,y2]=pt(a0,ro), [x3,y3]=pt(a1,ro), [x4,y4]=pt(a1,ri);
+    return `M${x1} ${y1} L${x2} ${y2} A${ro} ${ro} 0 0 1 ${x3} ${y3} L${x4} ${y4} A${ri} ${ri} 0 0 0 ${x1} ${y1} Z`;
+  }
+  function seg(d,fill,token){
+    const p=document.createElementNS(NS,'path');
+    p.setAttribute('d',d); p.setAttribute('fill',fill);
+    p.addEventListener('click',()=>{ flash(p); addDart(token); });
+    svg.appendChild(p);
+  }
+  function flash(node){ node.classList.add('flash'); setTimeout(()=>node.classList.remove('flash'),90); }
+  order.forEach((n,i)=>{
+    const c=i*18, a0=c-9, a1=c+9;
+    const dark=(i%2===0);
+    const single=dark?BLACK:CREAM, ring=dark?RED:GREEN;
+    seg(ringSeg(R.obull,R.sin,a0,a1), single, String(n));   // inner single
+    seg(ringSeg(R.sin,R.tin,a0,a1), ring, 'T'+n);           // treble
+    seg(ringSeg(R.tin,R.sout,a0,a1), single, String(n));    // outer single
+    seg(ringSeg(R.sout,R.dout,a0,a1), ring, 'D'+n);         // double
+  });
+  // bull
+  const ob=document.createElementNS(NS,'circle'); ob.setAttribute('cx',0); ob.setAttribute('cy',0);
+  ob.setAttribute('r',R.obull); ob.setAttribute('fill',GREEN);
+  ob.addEventListener('click',()=>{ flash(ob); addDart('SB'); }); svg.appendChild(ob);
+  const ib=document.createElementNS(NS,'circle'); ib.setAttribute('cx',0); ib.setAttribute('cy',0);
+  ib.setAttribute('r',R.ibull); ib.setAttribute('fill',RED);
+  ib.addEventListener('click',()=>{ flash(ib); addDart('DB'); }); svg.appendChild(ib);
+  // ring wires (decorative)
+  [R.obull,R.sin,R.tin,R.sout,R.dout].forEach(r=>{
+    const c=document.createElementNS(NS,'circle'); c.setAttribute('class','wire');
+    c.setAttribute('cx',0); c.setAttribute('cy',0); c.setAttribute('r',r); svg.appendChild(c);
+  });
+  // numbers around the outside
+  order.forEach((n,i)=>{
+    const [x,y]=pt(i*18, R.dout+16);
+    const t=document.createElementNS(NS,'text'); t.setAttribute('class','num');
+    t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=n; svg.appendChild(t);
+  });
+})();
 el('coShowChart').onchange=e=>{ el('chartCard').style.display=e.target.checked?'':'none'; };
 
 // build chart
