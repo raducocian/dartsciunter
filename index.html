@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Darts Counter Trainer</title>
+<title>Darts Trainer</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e1116'/%3E%3Cg transform='translate(32,32)'%3E%3Ccircle r='23' fill='%2310151c' stroke='%232b3442' stroke-width='1.5'/%3E%3Ccircle r='20' fill='%232f8c4e'/%3E%3Ccircle r='16' fill='%23171c24'/%3E%3Ccircle r='12.5' fill='%23c9362a'/%3E%3Ccircle r='9' fill='%23171c24'/%3E%3Ccircle r='5.2' fill='%23e7d9b4'/%3E%3Ccircle r='2.6' fill='%23d33a2c'/%3E%3Cg stroke='%230b0e13' stroke-width='1.6'%3E%3Cline x1='-23' x2='23'/%3E%3Cline y1='-23' y2='23'/%3E%3C/g%3E%3C/g%3E%3Cline x1='6' y1='58' x2='30' y2='34' stroke='%23eef1f5' stroke-width='3.4' stroke-linecap='round'/%3E%3Cpolygon points='4,60 14,56 12,46 2,50' fill='%2321c07a'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0e1116" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Darts" />
 <style>
   :root{
     --bg:#0e1116; --panel:#171c24; --panel2:#1f2733; --line:#2b3442;
@@ -15,6 +22,8 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .wrap{max-width:560px;margin:0 auto;padding:14px 14px 40px;min-height:100vh}
   header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{border-radius:10px;display:block;box-shadow:0 2px 8px rgba(0,0,0,.4)}
   h1{font-size:20px;margin:0;letter-spacing:.3px}
   h1 .dot{color:var(--accent)}
   .tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:12px;margin-bottom:14px}
@@ -128,7 +137,10 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>🎯 Darts <span class="dot">Trainer</span></h1>
+    <div class="brand">
+      <img class="logo" src="icon.svg" width="40" height="40" alt="" />
+      <h1>Darts <span class="dot">Trainer</span></h1>
+    </div>
     <div class="pill" id="streakPill">Streak 0</div>
   </header>
 

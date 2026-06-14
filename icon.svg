@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Darts Trainer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18202b"/>
+      <stop offset="1" stop-color="#0b0e13"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef1f5"/>
+      <stop offset="1" stop-color="#9aa3ad"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- dartboard -->
+  <g transform="translate(256,256)">
+    <circle r="176" fill="#10151c" stroke="#2b3442" stroke-width="8"/>
+    <circle r="150" fill="#2f8c4e"/>
+    <circle r="120" fill="#171c24"/>
+    <circle r="96"  fill="#c9362a"/>
+    <circle r="68"  fill="#171c24"/>
+    <circle r="40"  fill="#e7d9b4"/>
+    <circle r="19"  fill="#d33a2c"/>
+    <g stroke="#0b0e13" stroke-width="7" stroke-linecap="round">
+      <line x1="-176" y1="0" x2="176" y2="0"/>
+      <line x1="0" y1="-176" x2="0" y2="176"/>
+      <line x1="-124" y1="-124" x2="124" y2="124"/>
+      <line x1="-124" y1="124" x2="124" y2="-124"/>
+    </g>
+    <circle r="19" fill="#d33a2c"/>
+  </g>
+
+  <!-- dart striking the bull -->
+  <g transform="translate(256,256)">
+    <polygon points="-182,182 -127,171 -116,116 -171,127" fill="#21c07a" stroke="#189d63" stroke-width="3"/>
+    <line x1="-150" y1="150" x2="-20" y2="20" stroke="url(#steel)" stroke-width="20" stroke-linecap="round"/>
+    <polygon points="2,-2 -10,34 -34,10" fill="#eef1f5"/>
+  </g>
+</svg>
