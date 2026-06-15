@@ -1047,7 +1047,7 @@ let valView = SETTINGS.valView || 'quiz';
 function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
   const grouped = ord!=='seq';               // grp/ach/imp are all arranged by last digit
   let order=[];
-  if(grouped){ for(let d=1;d<=10;d++){ const dig=d%10; for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
+  if(grouped){ for(let dig=0;dig<=9;dig++){ for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
   else { for(let n=1;n<=60;n++) order.push(n); }
   let h='<div class="dtrow cols4 dthead"><span>N</span><span>Single</span><span>Double</span><span>Treble</span></div>';
   let prev=null;
