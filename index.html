@@ -69,11 +69,14 @@
     color:#9aa6b4;text-transform:uppercase;letter-spacing:1px;padding:8px 14px}
   .subtab.active{color:#fff;border-bottom-color:var(--neon);text-shadow:0 0 12px rgba(34,211,238,.55)}
   .dttable{font-size:15px}
-  .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:7px 6px;border-bottom:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums}
+  .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:7px 12px 7px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
   .dtrow:last-child{border-bottom:none}
   .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px;
     position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
-  .dtrow span:first-child{color:var(--accent);font-weight:800;text-align:left}
+  .dtrow span:first-child{color:var(--accent);font-weight:800}
+  .hittabs{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
+  .hittab{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .hittab.active{background:var(--accent);color:#04121f;border-color:var(--accent)}
   .dtrow .trbv{color:var(--accent2)}
   .dtrow.cols4{grid-template-columns:.6fr 1fr 1fr 1fr}
   .dtrow.imp{background:rgba(255,93,108,.13)}
@@ -351,10 +354,10 @@
       <div class="card"><div id="valTable" class="dttable"></div></div>
     </div>
     <div id="valHitWrap" style="display:none">
-      <div class="card" style="position:relative">
-        <button type="button" class="cardcfg" data-pop="hitPop" aria-label="Options"></button>
-        <div class="cardpop" id="hitPop" style="display:none">
-          <label class="cfgrow">Group by last digit <span class="switch"><input type="checkbox" id="hitGroup"><span class="slider"></span></span></label>
+      <div class="card">
+        <div class="hittabs">
+          <button type="button" class="hittab active" data-order="seq">1–60</button>
+          <button type="button" class="hittab" data-order="grp">by last digit</button>
         </div>
         <div id="valTable2" class="dttable"></div>
       </div>
@@ -1052,9 +1055,16 @@ function buildHit(grouped){
   }
   el('valTable2').innerHTML=h;
 }
-buildHit(SETTINGS.hitGroup||false);
-el('hitGroup').checked = !!SETTINGS.hitGroup;
-el('hitGroup').onchange=e=>{ SETTINGS.hitGroup=e.target.checked; saveSettings(); buildHit(e.target.checked); };
+buildHit(!!SETTINGS.hitGroup);
+document.querySelectorAll('.hittab').forEach(b=>{
+  b.classList.toggle('active', (b.dataset.order==='grp')===!!SETTINGS.hitGroup);
+  b.onclick=()=>{
+    const grp=b.dataset.order==='grp';
+    SETTINGS.hitGroup=grp; saveSettings();
+    document.querySelectorAll('.hittab').forEach(x=>x.classList.toggle('active',x===b));
+    buildHit(grp);
+  };
+});
 function setValView(v){
   valView=v; SETTINGS.valView=v; saveSettings();
   document.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
