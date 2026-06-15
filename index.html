@@ -95,9 +95,7 @@
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
     font-weight:700;letter-spacing:1px;font-size:13px;color:var(--muted)}
   .modal-x{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 13px;margin-bottom:10px;
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 8px 30px rgba(0,0,0,.45)}
+  .card{background:transparent;border:0;border-radius:0;padding:4px 2px 12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
   .prompt{text-align:center;padding:2px 0}
   .prompt .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
   .big{font-size:46px;font-weight:800;line-height:1;margin:4px 0;
@@ -171,10 +169,10 @@
   .coach .m{color:var(--muted);font-size:15px}
   .coach.hidden{display:none}
   /* dartboard */
-  .boardwrap{display:flex;justify-content:center;margin:2px -11px 8px}
+  .boardwrap{display:flex;justify-content:center;margin:4px 0 10px}
   svg#board.off{pointer-events:none;opacity:.38;filter:grayscale(.35)}
-  svg.dboard{width:100%;height:auto;aspect-ratio:1/1;touch-action:manipulation;
-    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 4px #1a1209}
+  svg.dboard{width:300px;height:300px;max-width:90vw;max-height:90vw;touch-action:manipulation;
+    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 8px #15110c, 0 0 0 11px #2a2118}
   .dboard path,.dboard circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
   .dboard path:active,.dboard circle:active,.dboard path.flash,.dboard circle.flash{filter:brightness(1.5)}
   .dboard .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
