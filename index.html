@@ -112,6 +112,7 @@
   .answer::placeholder{color:#566; font-weight:500; font-size:18px}
   .hint{min-height:22px;text-align:center;margin-top:10px;font-size:15px;font-weight:600}
   .hint.good{color:var(--good)} .hint.bad{color:var(--bad)} .hint.info{color:var(--muted)}
+  #coHint{min-height:34px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;margin:6px 0 12px}
   .hint .chip{font-size:16px;padding:3px 9px;margin:0 2px;cursor:default;vertical-align:middle}
   .revlbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 6px;vertical-align:middle}
   .row{display:flex;gap:10px;margin-top:12px}
@@ -399,8 +400,8 @@
           <span class="v" id="coCoachV"></span>
         </div>
         <div class="combo" id="coCombo"></div>
-        <div class="boardwrap"><svg id="board" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="hint info" id="coHint">&nbsp;</div>
+        <div class="boardwrap"><svg id="board" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="row">
           <button type="button" class="btn alt" id="coReveal">Reveal</button>
           <button type="button" class="btn alt" id="coGo">Throw ▸</button>
