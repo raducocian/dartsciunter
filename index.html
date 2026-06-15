@@ -1043,9 +1043,10 @@ let valView = SETTINGS.valView || 'quiz';
   el('valTable').innerHTML=h;
 })();
 // how to hit 1..60 — show the segment to aim at (blank if impossible); all-blank rows shaded red
-function buildHit(ord){ // ord: 'seq' | 'grp' | 'imp'
+function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
+  const grouped = ord!=='seq';               // grp/ach/imp are all arranged by last digit
   let order=[];
-  if(ord==='grp'){ for(let d=1;d<=10;d++){ const dig=d%10; for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
+  if(grouped){ for(let d=1;d<=10;d++){ const dig=d%10; for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
   else { for(let n=1;n<=60;n++) order.push(n); }
   let h='<div class="dtrow cols4 dthead"><span>N</span><span>Single</span><span>Double</span><span>Treble</span></div>';
   let prev=null;
@@ -1056,7 +1057,7 @@ function buildHit(ord){ // ord: 'seq' | 'grp' | 'imp'
     const imp=(s===''&&d===''&&t==='');
     if(ord==='imp' && !imp) continue;        // only non-achievable numbers
     if(ord==='ach' && imp) continue;         // only achievable numbers
-    const grp=(ord==='grp' && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
+    const grp=(grouped && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
     h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${n}</span><span>${s}</span><span>${d}</span><span>${t}</span></div>`;
   }
   el('valTable2').innerHTML=h;
