@@ -113,6 +113,8 @@
   .answer::placeholder{color:#566; font-weight:500; font-size:18px}
   .hint{min-height:22px;text-align:center;margin-top:10px;font-size:15px;font-weight:600}
   .hint.good{color:var(--good)} .hint.bad{color:var(--bad)} .hint.info{color:var(--muted)}
+  .hint .chip{font-size:16px;padding:3px 9px;margin:0 2px;cursor:default;vertical-align:middle}
+  .revlbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 6px;vertical-align:middle}
   .row{display:flex;gap:10px;margin-top:12px}
   button{font-family:inherit;border:none;cursor:pointer;font-weight:700}
   .btn{flex:1;padding:14px;border-radius:12px;font-size:16px;font-weight:700;letter-spacing:.3px;
@@ -1131,8 +1133,7 @@ function setCustomScore(n){
   coState={score:n, t0:performance.now(), solved:false, leg:false};
   coTokens=[]; el('coScore').textContent=n;
   renderCombo(); renderCoCoach();
-  const std=standardCheckout(n);                       // auto-reveal the standard route
-  setHint('coHint', std ? 'Standard: '+std : 'No checkout (bogey number)', std?'info':'bad');
+  showRevealChips('');                                 // auto-reveal the standard route as chips
 }
 // tap the big score to type a custom checkout
 el('coScore').addEventListener('click',()=>{
@@ -1154,11 +1155,18 @@ function addDart(tok){
   const r=parseCheckout(comboStr());
   if(!r.error && r.sum===coState.score && r.finishesDouble) coWin();   // auto-finish
 }
+function chipHTML(tok){ const dbl=/^D/.test(tok)||tok==='DB', trb=/^T/.test(tok);
+  return '<span class="chip'+(dbl?' dbl':'')+(trb?' trb':'')+'">'+tok+'</span>'; }
+function showRevealChips(extra){ // render the standard checkout as dart chips in the hint
+  const std=standardCheckout(coState.score); const h=el('coHint');
+  if(!std){ h.className='hint bad'; h.textContent='No checkout (bogey number)'; return; }
+  h.className='hint info';
+  h.innerHTML='<span class="revlbl">best out</span>'+std.split(' ').map(chipHTML).join('')+(extra?'<span class="revlbl">'+extra+'</span>':'');
+}
 function updateCoInfo(){
   if(revealOn){
-    const std=standardCheckout(coState.score)||'—';
-    let extra=''; if(coTokens.length){ const r=parseCheckout(comboStr()); if(!r.error) extra=' · '+(coState.score-r.sum)+' left'; }
-    setHint('coHint','Standard: '+std+extra,'info'); return;
+    let extra=''; if(coTokens.length){ const r=parseCheckout(comboStr()); if(!r.error) extra=(coState.score-r.sum)+' left'; }
+    showRevealChips(extra); return;
   }
   if(!coTokens.length){ setHint('coHint',' ','info'); return; }
   const r=parseCheckout(comboStr());
