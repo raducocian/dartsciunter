@@ -82,9 +82,8 @@
   .opt6.right{background:rgba(34,224,161,.22);border-color:var(--good);color:var(--good)}
   .opt6.wrong{background:rgba(255,93,108,.2);border-color:var(--bad);color:var(--bad)}
   /* quiz board: dim everything, spotlight the highlighted segment */
-  #qboard .seg{transition:opacity .1s}
-  #qboard.dim .seg{opacity:.28}
-  #qboard.dim .seg.hl{opacity:1;stroke:#fff;stroke-width:5}
+  /* quiz board: full colour like the others, spotlight the target segment */
+  #qboard .seg.hl{stroke:#fff;stroke-width:6;filter:brightness(1.45) drop-shadow(0 0 6px #fff)}
   #qboard .num{font-size:24px}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
@@ -171,15 +170,15 @@
   /* dartboard */
   .boardwrap{display:flex;justify-content:center;margin:6px 0 18px}
   svg#board.off{pointer-events:none;opacity:.38;filter:grayscale(.35)}
-  svg#board{width:320px;height:320px;max-width:88vw;max-height:88vw;touch-action:manipulation;
+  svg.dboard{width:320px;height:320px;max-width:88vw;max-height:88vw;touch-action:manipulation;
     background:#0b0e13;border-radius:50%;box-shadow:0 0 0 10px #15110c, 0 0 0 13px #2a2118}
-  #board path,#board circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
-  #board path:active,#board circle:active,#board path.flash,#board circle.flash{filter:brightness(1.5)}
-  #board .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
-  #board .num{fill:#f0e9d6;font-size:28px;font-weight:800;cursor:pointer;text-anchor:middle;
+  .dboard path,.dboard circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
+  .dboard path:active,.dboard circle:active,.dboard path.flash,.dboard circle.flash{filter:brightness(1.5)}
+  .dboard .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
+  .dboard .num{fill:#f0e9d6;font-size:28px;font-weight:800;cursor:pointer;text-anchor:middle;
     dominant-baseline:central;font-family:Arial,Helvetica,sans-serif}
-  #board .num:active{filter:brightness(1.6)}
-  #board .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
+  .dboard .num:active{filter:brightness(1.6)}
+  .dboard .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
     pointer-events:none;opacity:0;font-family:Arial,Helvetica,sans-serif;paint-order:stroke;stroke:#0009;stroke-width:2px}
   #board.showvals .segval{opacity:1}
   .combo{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;min-height:34px;align-items:center;margin-bottom:6px}
@@ -312,7 +311,7 @@
     <div id="valBoardWrap" style="display:none">
       <div class="card">
         <div class="prompt"><div class="label">Which value is highlighted?</div></div>
-        <div class="boardwrap"><svg id="qboard" class="quizboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
+        <div class="boardwrap"><svg id="qboard" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="opts6" id="qOpts"></div>
         <div class="hint info" id="qHint">&nbsp;</div>
         <div class="row"><button class="btn alt" id="qNext">New</button></div>
@@ -363,7 +362,7 @@
         </div>
         <div class="combo" id="coCombo"></div>
         <div class="hint info" id="coHint">&nbsp;</div>
-        <div class="boardwrap"><svg id="board" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
+        <div class="boardwrap"><svg id="board" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="row">
           <button type="button" class="btn alt" id="coUndo">⌫ Undo</button>
           <button type="button" class="btn alt" id="coClear">Clear</button>
@@ -956,7 +955,6 @@ el('valNext').onclick=newVal;
 
 /* ----- Board recognition quiz (highlight a double/treble -> pick value) ----- */
 let qMap=buildDartboard(el('qboard'), null);  // non-interactive board
-el('qboard').classList.add('dim');
 let qState={};
 function newQuiz(){
   const treble = Math.random()<0.55;
