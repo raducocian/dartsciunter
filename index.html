@@ -33,9 +33,9 @@
   .wrap{max-width:560px;margin:0 auto;padding:14px 14px 40px;min-height:100vh}
   header{display:flex;align-items:flex-end;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--line)}
   .logo{display:block;flex:0 0 auto;filter:drop-shadow(0 0 6px rgba(255,255,255,.4))}
-  .tabs{flex:1;display:flex;gap:1px;justify-content:flex-end;margin-bottom:-1px}
-  .tab{flex:0 0 auto;text-align:center;padding:11px 11px;
-    font-family:'Rajdhani',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-weight:700;font-size:16px;
+  .tabs{flex:1;display:flex;gap:1px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:-1px}
+  .tab{flex:0 0 auto;text-align:center;padding:10px 9px;
+    font-family:'Rajdhani',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-weight:700;font-size:15px;
     color:var(--muted);cursor:pointer;user-select:none;transition:.15s;white-space:nowrap;
     border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:1px}
   .tab.active{color:#fff;border-bottom-color:var(--neon);text-shadow:0 0 12px rgba(34,211,238,.55)}
@@ -161,6 +161,8 @@
     <nav class="tabs">
       <div class="tab active" data-mode="subtract">−</div>
       <div class="tab" data-mode="adds">+</div>
+      <div class="tab" data-mode="values">T·D</div>
+      <div class="tab" data-mode="round">R&amp;A</div>
       <div class="tab" data-mode="checkout">close</div>
       <div class="tab" data-mode="leg">full</div>
     </nav>
@@ -212,6 +214,49 @@
     </div>
     <div class="opts">
       <label><input type="checkbox" id="addValues"> Show each dart's value</label>
+    </div>
+  </section>
+
+  <!-- ============ T·D VALUES ============ -->
+  <section id="m-values" style="display:none">
+    <div class="card">
+      <div class="prompt">
+        <div class="label">Dart value</div>
+        <div class="big" id="valDart">T20</div>
+        <div class="sub">what's it worth?</div>
+      </div>
+      <div class="coach hidden" id="valCoach">
+        <span class="k">Should be</span>
+        <span class="m" id="valCoachM"></span>
+        <span class="v" id="valCoachV"></span>
+      </div>
+      <input class="answer" id="valInput" inputmode="none" placeholder="value" />
+      <div class="hint info" id="valHint">&nbsp;</div>
+      <div class="row">
+        <button class="btn alt" id="valReveal">Reveal</button>
+        <button class="btn alt" id="valNext">New</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ROUND & ADJUST ============ -->
+  <section id="m-round" style="display:none">
+    <div class="card">
+      <div class="prompt">
+        <div class="label">Round &amp; adjust</div>
+        <div class="big" id="roundQ">417 − 57</div>
+      </div>
+      <div class="coach hidden" id="roundCoach">
+        <span class="k">Method</span>
+        <span class="m" id="roundCoachM"></span>
+        <span class="v" id="roundCoachV"></span>
+      </div>
+      <input class="answer" id="roundInput" inputmode="none" placeholder="result" />
+      <div class="hint info" id="roundHint">&nbsp;</div>
+      <div class="row">
+        <button class="btn alt" id="roundReveal">Reveal</button>
+        <button class="btn alt" id="roundNext">New</button>
+      </div>
     </div>
   </section>
 
@@ -548,6 +593,8 @@ el('coachToggle').onchange = e=>{
 function refreshCoach(){
   if(mode==='subtract') renderSubCoach();
   if(mode==='adds') renderAddCoach();
+  if(mode==='values') renderValCoach();
+  if(mode==='round') renderRoundCoach();
   if(mode==='checkout') renderCoCoach();
   if(mode==='leg') (leg.phase==='checkout'?renderCoCoach():renderLegCoach());
 }
@@ -591,10 +638,12 @@ document.querySelectorAll('.tab').forEach(t=>{
     t.classList.add('active');
     mode=t.dataset.mode;
     SETTINGS.mode=mode; saveSettings();
-    ['subtract','adds','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
+    ['subtract','adds','values','round','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
     el('subOpts').style.display = (mode==='subtract'?'':'none');
     if(mode==='subtract') newSub();
     if(mode==='adds') newAdd();
+    if(mode==='values') newVal();
+    if(mode==='round') newRound();
     if(mode==='checkout') newCo();
     if(mode==='leg') newLeg(true);
     updateKeypad();
@@ -604,6 +653,8 @@ document.querySelectorAll('.tab').forEach(t=>{
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
   if(mode==='adds') el('addInput').focus();
+  if(mode==='values') el('valInput').focus();
+  if(mode==='round') el('roundInput').focus();
   if(mode==='leg') el('legInput').focus();
 }
 
@@ -611,6 +662,8 @@ function focusActive(){
 function currentNumInput(){
   if(mode==='subtract') return el('subInput');
   if(mode==='adds') return el('addInput');
+  if(mode==='values') return el('valInput');
+  if(mode==='round') return el('roundInput');
   if(mode==='leg' && leg.phase==='subtract') return el('legInput');
   return null;
 }
@@ -618,6 +671,8 @@ function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInpu
 function keypadSubmit(){
   if(mode==='subtract') (el('subInput').className.includes('good')?newSub():checkSub());
   else if(mode==='adds') (el('addInput').className.includes('good')?newAdd():checkAdd());
+  else if(mode==='values') (el('valInput').className.includes('good')?newVal():checkVal());
+  else if(mode==='round') (el('roundInput').className.includes('good')?newRound():checkRound());
   else if(mode==='leg') checkLeg();
 }
 el('keypad').addEventListener('click',e=>{
@@ -733,6 +788,106 @@ el('addValues').onchange=()=>{ // re-render current darts with/without values
     sp.innerHTML = d.label + (show?`<div style="font-size:13px;color:var(--muted);font-weight:600;margin-top:3px">${d.value}</div>`:'');
   });
 };
+
+/* ------------------------------------------------------------------ */
+/*  T·D VALUES mode (instant dart -> value recall)                     */
+/* ------------------------------------------------------------------ */
+function quizDart(){ // weighted toward the values worth memorizing
+  const r=Math.random();
+  if(r<0.50){ const b=1+rnd(20); return {label:'T'+b, value:3*b}; }
+  if(r<0.80){ const b=1+rnd(20); return {label:'D'+b, value:2*b}; }
+  if(r<0.90) return {label:'Bull', value:50};
+  if(r<0.95) return {label:'25', value:25};
+  const b=1+rnd(20); return {label:String(b), value:b};
+}
+let valState={};
+function renderValCoach(force){
+  const c=el('valCoach');
+  if((coachOn||force) && valState.value!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    el('valCoachM').textContent=valState.label+' =';
+    el('valCoachV').textContent=valState.value;
+  } else c.classList.add('hidden');
+}
+function newVal(){
+  const d=quizDart();
+  valState={label:d.label, value:d.value, t0:performance.now()};
+  el('valDart').textContent=d.label;
+  const inp=el('valInput'); inp.value=''; inp.className='answer';
+  setHint('valHint',' ','info'); renderValCoach(); inp.focus();
+}
+function checkVal(){
+  const inp=el('valInput'); const v=inp.value.trim(); if(v==='') return;
+  const ms=performance.now()-valState.t0;
+  if(+v===valState.value){
+    inp.className='answer good'; setHint('valHint','✓ '+valState.label+' = '+valState.value,'good');
+    record(true,ms); setTimeout(newVal,550);
+  } else {
+    inp.className='answer bad'; setHint('valHint','✗ not '+v+' — see below','bad');
+    renderValCoach(true); record(false,ms);
+  }
+}
+el('valNext').onclick=newVal;
+el('valReveal').onclick=()=> setHint('valHint',valState.label+' = '+valState.value,'info');
+el('valInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('valInput').className.includes('good')?newVal():checkVal()); });
+
+/* ------------------------------------------------------------------ */
+/*  ROUND & ADJUST mode                                                */
+/* ------------------------------------------------------------------ */
+let roundState={};
+function roundSteps(){
+  const {base,val,op}=roundState;
+  const rt=Math.round(val/10)*10;            // nearest ten
+  if(rt===0) return `${base} ${op} ${val} =`; // single-digit: no rounding needed
+  if(op==='−'){
+    const adj=rt-val;                         // add back after over-subtracting
+    return adj===0 ? `${base} − ${val} =`
+      : `${base} − ${rt} = ${base-rt},  ${adj>0?'+':'−'} ${Math.abs(adj)} =`;
+  } else {
+    const adj=val-rt;
+    return adj===0 ? `${base} + ${val} =`
+      : `${base} + ${rt} = ${base+rt},  ${adj>0?'+':'−'} ${Math.abs(adj)} =`;
+  }
+}
+function renderRoundCoach(force){
+  const c=el('roundCoach');
+  if((coachOn||force) && roundState.answer!=null){
+    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
+    el('roundCoachM').textContent=roundSteps();
+    el('roundCoachV').textContent=roundState.answer;
+  } else c.classList.add('hidden');
+}
+function newRound(){
+  const sub = Math.random()<0.6;
+  const dv = quizDart();
+  let base, answer;
+  if(sub){
+    base = 90 + rnd(412);                      // 90..501
+    if(base - dv.value < 2) base = dv.value + 2 + rnd(80);
+    answer = base - dv.value;
+  } else {
+    base = 20 + rnd(120);                       // running total 20..139
+    answer = base + dv.value;
+  }
+  roundState={base, op:sub?'−':'+', val:dv.value, answer, t0:performance.now()};
+  el('roundQ').textContent = base+'  '+(sub?'−':'+')+'  '+dv.value;
+  const inp=el('roundInput'); inp.value=''; inp.className='answer';
+  setHint('roundHint',' ','info'); renderRoundCoach(); inp.focus();
+}
+function checkRound(){
+  const inp=el('roundInput'); const v=inp.value.trim(); if(v==='') return;
+  const ms=performance.now()-roundState.t0;
+  if(+v===roundState.answer){
+    inp.className='answer good'; setHint('roundHint','✓ '+roundState.answer,'good');
+    record(true,ms); setTimeout(newRound,600);
+  } else {
+    inp.className='answer bad'; setHint('roundHint','✗ not quite — see the method','bad');
+    renderRoundCoach(true); record(false,ms);
+  }
+}
+el('roundNext').onclick=newRound;
+el('roundReveal').onclick=()=> setHint('roundHint',roundState.base+' '+roundState.op+' '+roundState.val+' = '+roundState.answer,'info');
+el('roundInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('roundInput').className.includes('good')?newRound():checkRound()); });
 
 /* ------------------------------------------------------------------ */
 /*  CHECKOUT mode                                                      */
