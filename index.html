@@ -96,6 +96,7 @@
     font-weight:700;letter-spacing:1px;font-size:13px;color:var(--muted)}
   .modal-x{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}
   .card{background:transparent;border:0;border-radius:0;padding:4px 2px 12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+  .sep{border:0;border-top:1px solid var(--line);margin:12px 0}
   .prompt{text-align:center;padding:2px 0}
   .prompt .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
   .big{font-size:46px;font-weight:800;line-height:1;margin:4px 0;
@@ -467,13 +468,15 @@
       <div class="stat"><div class="v" id="stAcc">100%</div><div class="k">Accuracy</div></div>
       <div class="stat"><div class="v" id="stTime">—</div><div class="k">Avg sec</div></div>
     </div>
-    <div class="phead" style="margin-top:14px">
+    <hr class="sep">
+    <div class="phead">
       <span class="label" style="color:var(--muted);letter-spacing:1px">DAILY PROGRESS</span>
       <span class="pill" id="dayStreak">🔥 0 days</span>
     </div>
     <div id="todayLine" class="todayline"></div>
     <div id="progress"></div>
-    <p class="note" style="text-align:center">Saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a></p>
+    <hr class="sep">
+    <p class="note" style="text-align:center;margin:0">Saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a></p>
   </div>
 </div>
 
