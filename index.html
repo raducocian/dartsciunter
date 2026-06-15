@@ -181,6 +181,9 @@
   .dboard .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
     pointer-events:none;opacity:0;font-family:Arial,Helvetica,sans-serif;paint-order:stroke;stroke:#0009;stroke-width:2px}
   .dboard.showvals .segval{opacity:1}
+  #coScore{cursor:pointer}
+  .scoreedit{font:inherit;width:2.4em;text-align:center;background:var(--panel2);color:var(--txt);
+    border:2px solid var(--accent);border-radius:10px;outline:none;text-shadow:none;padding:0 4px}
   .cardcfg{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;line-height:0;z-index:5}
   .cardcfg svg{width:20px;height:20px;fill:currentColor;display:block}
   .cardcfg.on{color:var(--accent)}
@@ -1126,6 +1129,28 @@ function newCo(){
   renderCoCoach();
   sessionTip();
 }
+function setCustomScore(n){
+  if(!(n>=2 && n<=170)){ return; }
+  homeBoard();
+  coState={score:n, t0:performance.now(), done:false, leg:false};
+  coTokens=[]; el('coScore').textContent=n; el('coGo').textContent='Throw ▸';
+  renderCombo(); setStuck(false); renderCoCoach();
+  const std=standardCheckout(n);                       // auto-reveal the standard route
+  setHint('coHint', std ? 'Standard: '+std : 'No checkout (bogey number)', std?'info':'bad');
+}
+// tap the big score to type a custom checkout
+el('coScore').addEventListener('click',()=>{
+  if(coState.leg) return;                              // not during a leg checkout
+  const cur=coState.score||40;
+  const inp=document.createElement('input');
+  inp.type='text'; inp.inputMode='numeric'; inp.className='scoreedit'; inp.value=''; inp.placeholder=String(cur);
+  el('coScore').textContent=''; el('coScore').appendChild(inp); inp.focus();
+  let done=false;
+  const commit=()=>{ if(done) return; done=true; const v=parseInt(inp.value,10);
+    if(v>=2 && v<=170) setCustomScore(v); else el('coScore').textContent=cur; };
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); commit(); } });
+  inp.addEventListener('blur',commit);
+});
 function addDart(tok){
   if(coState.done || coTokens.length>=3) return;
   coTokens.push(tok); renderCombo(); updateCoInfo();
