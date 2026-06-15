@@ -169,17 +169,17 @@
   .coach .m{color:var(--muted);font-size:15px}
   .coach.hidden{display:none}
   /* dartboard */
-  .boardwrap{display:flex;justify-content:center;margin:4px 0 10px}
+  .boardwrap{display:flex;justify-content:center;margin:4px 0 12px}
   svg#board.off{pointer-events:none;opacity:.38;filter:grayscale(.35)}
-  svg.dboard{width:300px;height:300px;max-width:90vw;max-height:90vw;touch-action:manipulation;
-    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 8px #15110c, 0 0 0 11px #2a2118}
+  svg.dboard{width:100%;height:auto;aspect-ratio:1/1;max-width:460px;touch-action:manipulation;
+    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 5px #1a1209}
   .dboard path,.dboard circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
   .dboard path:active,.dboard circle:active,.dboard path.flash,.dboard circle.flash{filter:brightness(1.5)}
   .dboard .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
-  .dboard .num{fill:#f0e9d6;font-size:34px;font-weight:800;cursor:pointer;text-anchor:middle;
+  .dboard .num{fill:#f0e9d6;font-size:38px;font-weight:800;cursor:pointer;text-anchor:middle;
     dominant-baseline:central;font-family:Arial,Helvetica,sans-serif}
   .dboard .num:active{filter:brightness(1.6)}
-  .dboard .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
+  .dboard .segval{fill:#fff;font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:central;
     pointer-events:none;opacity:0;font-family:Arial,Helvetica,sans-serif;paint-order:stroke;stroke:#0009;stroke-width:2px}
   .dboard.showvals .segval{opacity:1}
   #coScore{cursor:pointer}
@@ -1245,7 +1245,7 @@ function buildDartboard(svg, onTap){
     c.setAttribute('cx',0); c.setAttribute('cy',0); c.setAttribute('r',r); svg.appendChild(c);
   });
   order.forEach((n,i)=>{
-    const [x,y]=pt(i*18, R.dout+32);
+    const [x,y]=pt(i*18, R.dout+27);
     const t=document.createElementNS(NS,'text'); t.setAttribute('class','num');
     t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=n;
     if(onTap) t.addEventListener('click',()=>{ flash(t); onTap(String(n)); });
