@@ -71,7 +71,8 @@
   .dttable{font-size:15px}
   .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:7px 6px;border-bottom:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums}
   .dtrow:last-child{border-bottom:none}
-  .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px}
+  .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px;
+    position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
   .dtrow span:first-child{color:var(--accent);font-weight:800;text-align:left}
   .dtrow .trbv{color:var(--accent2)}
   .dtrow.cols4{grid-template-columns:.6fr 1fr 1fr 1fr}
