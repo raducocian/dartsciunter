@@ -180,7 +180,12 @@
   .dboard .num:active{filter:brightness(1.6)}
   .dboard .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
     pointer-events:none;opacity:0;font-family:Arial,Helvetica,sans-serif;paint-order:stroke;stroke:#0009;stroke-width:2px}
-  #board.showvals .segval{opacity:1}
+  .dboard.showvals .segval{opacity:1}
+  .cardcfg{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;line-height:0;z-index:5}
+  .cardcfg svg{width:20px;height:20px;fill:currentColor;display:block}
+  .cardcfg.on{color:var(--accent)}
+  .cardpop{position:absolute;top:42px;right:10px;z-index:20;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:6px 14px;box-shadow:0 14px 34px rgba(0,0,0,.5);min-width:210px}
   .combo{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;min-height:34px;align-items:center;margin-bottom:6px}
   .combo .empty{color:var(--muted);font-size:14px}
   .chip{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:5px 12px;font-weight:800;font-size:18px;cursor:pointer}
@@ -309,7 +314,15 @@
       </div>
     </div>
     <div id="valBoardWrap" style="display:none">
-      <div class="card">
+      <div class="card" style="position:relative">
+        <button type="button" class="cardcfg" id="qCfgBtn" title="Options" aria-label="Options">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </button>
+        <div class="cardpop" id="qPop" style="display:none">
+          <label class="cfgrow">Reveal D/T values
+            <span class="switch"><input type="checkbox" id="qShowVals"><span class="slider"></span></span>
+          </label>
+        </div>
         <div class="prompt"><div class="label">Which value is highlighted?</div></div>
         <div class="boardwrap"><svg id="qboard" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="opts6" id="qOpts"></div>
@@ -981,6 +994,13 @@ function chooseQuiz(v,btn){
   else { setHint('qHint','✗ '+qState.token+' = '+qState.value,'bad'); record(false,ms); setTimeout(newQuiz,1300); }
 }
 el('qNext').onclick=newQuiz;
+/* board-quiz in-tab options popup */
+el('qCfgBtn').onclick=e=>{ e.stopPropagation(); const p=el('qPop'); const show=p.style.display==='none';
+  p.style.display=show?'':'none'; el('qCfgBtn').classList.toggle('on',show); };
+el('qPop').addEventListener('click',e=>e.stopPropagation());
+document.addEventListener('click',()=>{ el('qPop').style.display='none'; el('qCfgBtn').classList.remove('on'); });
+el('qShowVals').onchange=e=>{ SETTINGS.qboardVals=e.target.checked; saveSettings(); el('qboard').classList.toggle('showvals', e.target.checked); };
+if(SETTINGS.qboardVals){ el('qShowVals').checked=true; el('qboard').classList.add('showvals'); }
 
 /* T·D sub-tabs */
 let valView = SETTINGS.valView || 'quiz';
