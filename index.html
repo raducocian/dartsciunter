@@ -359,7 +359,8 @@
       <div class="card">
         <div class="hittabs">
           <button type="button" class="hittab active" data-order="seq">1–60</button>
-          <button type="button" class="hittab" data-order="grp">by last digit</button>
+          <button type="button" class="hittab" data-order="grp">by digit</button>
+          <button type="button" class="hittab" data-order="imp">can't hit</button>
         </div>
         <div id="valTable2" class="dttable"></div>
       </div>
@@ -1041,9 +1042,9 @@ let valView = SETTINGS.valView || 'quiz';
   el('valTable').innerHTML=h;
 })();
 // how to hit 1..60 — show the segment to aim at (blank if impossible); all-blank rows shaded red
-function buildHit(grouped){
+function buildHit(ord){ // ord: 'seq' | 'grp' | 'imp'
   let order=[];
-  if(grouped){ for(let d=1;d<=10;d++){ const dig=d%10; for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
+  if(ord==='grp'){ for(let d=1;d<=10;d++){ const dig=d%10; for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
   else { for(let n=1;n<=60;n++) order.push(n); }
   let h='<div class="dtrow cols4 dthead"><span>N</span><span>Single</span><span>Double</span><span>Treble</span></div>';
   let prev=null;
@@ -1052,19 +1053,20 @@ function buildHit(grouped){
     const d=(n%2===0&&n/2<=20)?(n/2):(n===50?'B':'');
     const t=(n%3===0&&n/3<=20)?(n/3):'';
     const imp=(s===''&&d===''&&t==='');
-    const grp=(grouped && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
+    if(ord==='imp' && !imp) continue;        // only the non-achievable numbers
+    const grp=(ord==='grp' && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
     h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${n}</span><span>${s}</span><span>${d}</span><span>${t}</span></div>`;
   }
   el('valTable2').innerHTML=h;
 }
-buildHit(!!SETTINGS.hitGroup);
+let hitOrd = SETTINGS.hitOrder || (SETTINGS.hitGroup?'grp':'seq');
+buildHit(hitOrd);
 document.querySelectorAll('.hittab').forEach(b=>{
-  b.classList.toggle('active', (b.dataset.order==='grp')===!!SETTINGS.hitGroup);
+  b.classList.toggle('active', b.dataset.order===hitOrd);
   b.onclick=()=>{
-    const grp=b.dataset.order==='grp';
-    SETTINGS.hitGroup=grp; saveSettings();
+    hitOrd=b.dataset.order; SETTINGS.hitOrder=hitOrd; saveSettings();
     document.querySelectorAll('.hittab').forEach(x=>x.classList.toggle('active',x===b));
-    buildHit(grp);
+    buildHit(hitOrd);
   };
 });
 function setValView(v){
