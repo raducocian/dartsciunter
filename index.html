@@ -258,6 +258,11 @@
         <button class="btn alt" id="roundNext">New</button>
       </div>
     </div>
+    <div class="opts">
+      <label>Practice
+        <select id="roundOp"><option value="mixed" selected>mixed</option><option value="sub">subtract only</option><option value="add">add only</option></select>
+      </label>
+    </div>
   </section>
 
   <!-- ============ CHECKOUT ============ -->
@@ -858,7 +863,8 @@ function renderRoundCoach(force){
   } else c.classList.add('hidden');
 }
 function newRound(){
-  const sub = Math.random()<0.6;
+  const opSel = el('roundOp').value;
+  const sub = opSel==='sub' ? true : opSel==='add' ? false : Math.random()<0.7;
   const dv = quizDart();
   let base, answer;
   if(sub){
@@ -888,6 +894,7 @@ function checkRound(){
 el('roundNext').onclick=newRound;
 el('roundReveal').onclick=()=> setHint('roundHint',roundState.base+' '+roundState.op+' '+roundState.val+' = '+roundState.answer,'info');
 el('roundInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('roundInput').className.includes('good')?newRound():checkRound()); });
+el('roundOp').onchange=()=>{ SETTINGS.roundOp=el('roundOp').value; saveSettings(); newRound(); };
 
 /* ------------------------------------------------------------------ */
 /*  CHECKOUT mode                                                      */
@@ -1134,6 +1141,7 @@ el('resetHistory').onclick=e=>{ e.preventDefault();
 if(SETTINGS.subDarts!==undefined) el('subDarts').value=SETTINGS.subDarts;
 if(SETTINGS.subChain!==undefined) el('subChain').checked=SETTINGS.subChain;
 if(SETTINGS.coRange!==undefined) el('coRange').value=SETTINGS.coRange;
+if(SETTINGS.roundOp!==undefined) el('roundOp').value=SETTINGS.roundOp;
 if(SETTINGS.addValues!==undefined) el('addValues').checked=SETTINGS.addValues;
 if(SETTINGS.coShowChart){ el('coShowChart').checked=true; el('chartCard').style.display=''; }
 renderStats(); renderProgress();
