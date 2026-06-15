@@ -74,6 +74,9 @@
   .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px}
   .dtrow span:first-child{color:var(--accent);font-weight:800;text-align:left}
   .dtrow .trbv{color:var(--accent2)}
+  .dtrow.cols4{grid-template-columns:.7fr 1fr 1fr 1fr}
+  .dtrow .no{color:var(--bad)}
+  .dtsub{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
   .opts6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
   .opt6{padding:18px 0;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
     font-size:24px;font-weight:800;cursor:pointer;font-variant-numeric:tabular-nums}
@@ -342,7 +345,12 @@
       </div>
     </div>
     <div id="valTableWrap" style="display:none">
-      <div class="card"><div id="valTable" class="dttable"></div></div>
+      <div class="card">
+        <div class="dtsub">Treble &amp; double values</div>
+        <div id="valTable" class="dttable"></div>
+        <div class="dtsub" style="margin-top:16px">How to hit 1–60</div>
+        <div id="valTable2" class="dttable"></div>
+      </div>
     </div>
   </section>
 
@@ -1019,6 +1027,16 @@ let valView = SETTINGS.valView || 'quiz';
   for(let n=20;n>=1;n--) h+=`<div class="dtrow"><span>${n}</span><span class="trbv">${3*n}</span><span>${2*n}</span></div>`;
   h+='<div class="dtrow"><span>Bull</span><span class="trbv">—</span><span>50</span></div>';
   el('valTable').innerHTML=h;
+  // how to hit 1..60 via single / double / treble
+  const cell=v=> v ? `<span>${v}</span>` : '<span class="no">✗</span>';
+  let h2='<div class="dtrow cols4 dthead"><span>#</span><span>Single</span><span>Double</span><span>Treble</span></div>';
+  for(let n=1;n<=60;n++){
+    const s = (n<=20)?('S'+n) : (n===25?'SB':null);
+    const d = (n%2===0 && n/2<=20)?('D'+(n/2)) : (n===50?'DB':null);
+    const t = (n%3===0 && n/3<=20)?('T'+(n/3)) : null;
+    h2+=`<div class="dtrow cols4"><span>${n}</span>${cell(s)}${cell(d)}${cell(t)}</div>`;
+  }
+  el('valTable2').innerHTML=h2;
 })();
 function setValView(v){
   valView=v; SETTINGS.valView=v; saveSettings();
