@@ -200,6 +200,7 @@
       <div class="tab" data-mode="round">R&amp;A</div>
       <div class="tab" data-mode="checkout">close</div>
       <div class="tab" data-mode="leg">full</div>
+      <div class="tab cfg" id="statsBtn" title="Stats" aria-label="Stats">📈</div>
       <div class="tab cfg" id="cfgBtn" title="Settings" aria-label="Settings">⚙</div>
     </nav>
   </header>
@@ -396,23 +397,25 @@
     <label>Chain down a leg <span class="switch"><input type="checkbox" id="subChain" checked><span class="slider"></span></span></label>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="v" id="stCorrect">0</div><div class="k">Correct</div></div>
-    <div class="stat"><div class="v" id="stTotal">0</div><div class="k">Attempts</div></div>
-    <div class="stat"><div class="v" id="stAcc">100%</div><div class="k">Accuracy</div></div>
-    <div class="stat"><div class="v" id="stTime">—</div><div class="k">Avg sec</div></div>
-  </div>
+</div>
 
-  <div class="card" style="margin-top:14px">
-    <div class="phead">
-      <span class="label" style="color:var(--muted);letter-spacing:1px">📈 DAILY PROGRESS</span>
+<div id="statsModal" class="modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head"><span>📈 STATS</span><button type="button" class="modal-x" id="statsClose" aria-label="Close">✕</button></div>
+    <div class="stats">
+      <div class="stat"><div class="v" id="stCorrect">0</div><div class="k">Correct</div></div>
+      <div class="stat"><div class="v" id="stTotal">0</div><div class="k">Attempts</div></div>
+      <div class="stat"><div class="v" id="stAcc">100%</div><div class="k">Accuracy</div></div>
+      <div class="stat"><div class="v" id="stTime">—</div><div class="k">Avg sec</div></div>
+    </div>
+    <div class="phead" style="margin-top:14px">
+      <span class="label" style="color:var(--muted);letter-spacing:1px">DAILY PROGRESS</span>
       <span class="pill" id="dayStreak">🔥 0 days</span>
     </div>
     <div id="todayLine" class="todayline"></div>
     <div id="progress"></div>
+    <p class="note" style="text-align:center">Saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a></p>
   </div>
-
-  <p class="note" style="text-align:center">All stats are saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a> · type answer + <span class="kbd">Enter</span></p>
 </div>
 
 <div id="configModal" class="modal" style="display:none">
@@ -637,7 +640,13 @@ function closeCfg(){ el('configModal').style.display='none'; el('cfgBtn').classL
 el('cfgBtn').onclick=()=>{ el('configModal').style.display==='none'?openCfg():closeCfg(); };
 el('cfgClose').onclick=closeCfg;
 el('configModal').addEventListener('click',e=>{ if(e.target===el('configModal')) closeCfg(); }); // click backdrop
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeCfg(); });
+/* ----- Stats modal ----- */
+function openStats(){ el('statsModal').style.display='flex'; el('statsBtn').classList.add('on'); }
+function closeStats(){ el('statsModal').style.display='none'; el('statsBtn').classList.remove('on'); }
+el('statsBtn').onclick=()=>{ el('statsModal').style.display==='none'?openStats():closeStats(); };
+el('statsClose').onclick=closeStats;
+el('statsModal').addEventListener('click',e=>{ if(e.target===el('statsModal')) closeStats(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeCfg(); closeStats(); } });
 function applyTheme(light){ document.body.classList.toggle('light', !!light); }
 el('themeToggle').checked = SETTINGS.theme==='light';
 applyTheme(SETTINGS.theme==='light');
