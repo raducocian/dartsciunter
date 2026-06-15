@@ -247,7 +247,14 @@
 
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
-    <div class="card">
+    <div class="card" style="position:relative">
+      <button type="button" class="cardcfg" data-pop="subPop" aria-label="Options"></button>
+      <div class="cardpop" id="subPop" style="display:none">
+        <label class="cfgrow">Darts shown
+          <select id="subDarts"><option value="rand" selected>random 1–3</option><option value="1">1 dart</option><option value="2">2 darts</option><option value="3">3 darts</option></select>
+        </label>
+        <label class="cfgrow">Chain down a leg <span class="switch"><input type="checkbox" id="subChain" checked><span class="slider"></span></span></label>
+      </div>
       <div class="prompt">
         <div class="label">Score on</div>
         <div class="big" id="subScore">501</div>
@@ -270,7 +277,11 @@
 
   <!-- ============ ADDS ============ -->
   <section id="m-adds" style="display:none">
-    <div class="card">
+    <div class="card" style="position:relative">
+      <button type="button" class="cardcfg" data-pop="addPop" aria-label="Options"></button>
+      <div class="cardpop" id="addPop" style="display:none">
+        <label class="cfgrow">Show each dart's value <span class="switch"><input type="checkbox" id="addValues"><span class="slider"></span></span></label>
+      </div>
       <div class="prompt">
         <div class="label">Total the three darts</div>
         <div class="darts3" id="addDarts"><span class="d3"></span><span class="d3"></span><span class="d3"></span></div>
@@ -286,9 +297,6 @@
         <button class="btn alt" id="addReveal">Reveal</button>
         <button class="btn alt" id="addNext">New</button>
       </div>
-    </div>
-    <div class="opts">
-      <label>Show each dart's value <span class="switch"><input type="checkbox" id="addValues"><span class="slider"></span></span></label>
     </div>
   </section>
 
@@ -315,9 +323,7 @@
     </div>
     <div id="valBoardWrap" style="display:none">
       <div class="card" style="position:relative">
-        <button type="button" class="cardcfg" id="qCfgBtn" title="Options" aria-label="Options">
-          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-        </button>
+        <button type="button" class="cardcfg" data-pop="qPop" aria-label="Options"></button>
         <div class="cardpop" id="qPop" style="display:none">
           <label class="cfgrow">Reveal D/T values
             <span class="switch"><input type="checkbox" id="qShowVals"><span class="slider"></span></span>
@@ -337,7 +343,13 @@
 
   <!-- ============ ROUND & ADJUST ============ -->
   <section id="m-round" style="display:none">
-    <div class="card">
+    <div class="card" style="position:relative">
+      <button type="button" class="cardcfg" data-pop="roundPop" aria-label="Options"></button>
+      <div class="cardpop" id="roundPop" style="display:none">
+        <label class="cfgrow">Practice
+          <select id="roundOp"><option value="mixed" selected>mixed</option><option value="sub">subtract only</option><option value="add">add only</option></select>
+        </label>
+      </div>
       <div class="prompt">
         <div class="label">Round &amp; adjust</div>
         <div class="big" id="roundQ">417 − 57</div>
@@ -354,16 +366,24 @@
         <button class="btn alt" id="roundNext">New</button>
       </div>
     </div>
-    <div class="opts">
-      <label>Practice
-        <select id="roundOp"><option value="mixed" selected>mixed</option><option value="sub">subtract only</option><option value="add">add only</option></select>
-      </label>
-    </div>
   </section>
 
   <!-- ============ CHECKOUT ============ -->
   <section id="m-checkout" style="display:none">
-    <div class="card" id="coHome">
+    <div class="card" id="coHome" style="position:relative">
+      <button type="button" class="cardcfg" data-pop="coPop" aria-label="Options"></button>
+      <div class="cardpop" id="coPop" style="display:none">
+        <label class="cfgrow">Range
+          <select id="coRange">
+            <option value="easy">Doubles &amp; easy (2–60)</option>
+            <option value="mid" selected>Common (61–120)</option>
+            <option value="big">Big finishes (121–170)</option>
+            <option value="all">Anything (2–170)</option>
+          </select>
+        </label>
+        <label class="cfgrow">Show chart <span class="switch"><input type="checkbox" id="coShowChart"><span class="slider"></span></span></label>
+        <label class="cfgrow">Show D/T values <span class="switch"><input type="checkbox" id="coShowVals"><span class="slider"></span></span></label>
+      </div>
       <div class="prompt">
         <div class="label">Checkout from</div>
         <div class="big" id="coScore">—</div>
@@ -385,18 +405,6 @@
           <button type="button" class="btn alt" id="coGo">Throw ▸</button>
         </div>
       </div>
-    </div>
-    <div class="opts">
-      <label>Range
-        <select id="coRange">
-          <option value="easy">Doubles &amp; easy (2–60)</option>
-          <option value="mid" selected>Common (61–120)</option>
-          <option value="big">Big finishes (121–170)</option>
-          <option value="all">Anything (2–170)</option>
-        </select>
-      </label>
-      <label>Show chart <span class="switch"><input type="checkbox" id="coShowChart"><span class="slider"></span></span></label>
-      <label>Show D/T values <span class="switch"><input type="checkbox" id="coShowVals"><span class="slider"></span></span></label>
     </div>
     <div class="card" id="chartCard" style="display:none">
       <div class="label" style="color:var(--muted);margin-bottom:8px;letter-spacing:1px">STANDARD CHECKOUT CHART</div>
@@ -446,13 +454,6 @@
     <button type="button" class="key del" data-k="del">⌫</button>
     <button type="button" class="key" data-k="0">0</button>
     <button type="button" class="key ok" data-k="ok">Enter</button>
-  </div>
-
-  <div class="opts" id="subOpts" style="display:none">
-    <label>Darts shown
-      <select id="subDarts"><option value="rand" selected>random 1–3</option><option value="1">1 dart</option><option value="2">2 darts</option><option value="3">3 darts</option></select>
-    </label>
-    <label>Chain down a leg <span class="switch"><input type="checkbox" id="subChain" checked><span class="slider"></span></span></label>
   </div>
 
 </div>
@@ -768,7 +769,7 @@ document.querySelectorAll('.tab[data-mode]').forEach(t=>{
     mode=t.dataset.mode;
     SETTINGS.mode=mode; saveSettings();
     ['subtract','adds','values','round','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
-    el('subOpts').style.display = (mode==='subtract'?'':'none');
+    closeCardPops();
     if(mode==='subtract') newSub();
     if(mode==='adds') newAdd();
     if(mode==='values') newVal();
@@ -995,10 +996,16 @@ function chooseQuiz(v,btn){
 }
 el('qNext').onclick=newQuiz;
 /* board-quiz in-tab options popup */
-el('qCfgBtn').onclick=e=>{ e.stopPropagation(); const p=el('qPop'); const show=p.style.display==='none';
-  p.style.display=show?'':'none'; el('qCfgBtn').classList.toggle('on',show); };
-el('qPop').addEventListener('click',e=>e.stopPropagation());
-document.addEventListener('click',()=>{ el('qPop').style.display='none'; el('qCfgBtn').classList.remove('on'); });
+/* generic in-card options popups (gear -> popup), shared across modes */
+const GEAR_SVG='<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
+function closeCardPops(){ document.querySelectorAll('.cardpop').forEach(p=>p.style.display='none'); document.querySelectorAll('.cardcfg').forEach(b=>b.classList.remove('on')); }
+document.querySelectorAll('.cardcfg').forEach(btn=>{
+  btn.innerHTML=GEAR_SVG;
+  const pop=el(btn.dataset.pop);
+  btn.onclick=e=>{ e.stopPropagation(); const show=pop.style.display==='none'; closeCardPops(); if(show){ pop.style.display=''; btn.classList.add('on'); } };
+  pop.addEventListener('click',e=>e.stopPropagation());
+});
+document.addEventListener('click',closeCardPops);
 el('qShowVals').onchange=e=>{ SETTINGS.qboardVals=e.target.checked; saveSettings(); el('qboard').classList.toggle('showvals', e.target.checked); };
 if(SETTINGS.qboardVals){ el('qShowVals').checked=true; el('qboard').classList.add('showvals'); }
 
