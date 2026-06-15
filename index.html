@@ -80,6 +80,11 @@
   .opt6:active{filter:brightness(1.3)}
   .opt6.right{background:rgba(34,224,161,.22);border-color:var(--good);color:var(--good)}
   .opt6.wrong{background:rgba(255,93,108,.2);border-color:var(--bad);color:var(--bad)}
+  /* quiz board: dim everything, spotlight the highlighted segment */
+  #qboard .seg{transition:opacity .1s}
+  #qboard.dim .seg{opacity:.28}
+  #qboard.dim .seg.hl{opacity:1;stroke:#fff;stroke-width:5}
+  #qboard .num{font-size:24px}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
@@ -285,8 +290,9 @@
   <!-- ============ T·D VALUES ============ -->
   <section id="m-values" style="display:none">
     <div class="subtabs">
-      <button type="button" class="subtab active" data-vt="quiz">Quiz</button>
-      <button type="button" class="subtab" data-vt="table">D/T table</button>
+      <button type="button" class="subtab active" data-vt="quiz">Notation</button>
+      <button type="button" class="subtab" data-vt="board">Board</button>
+      <button type="button" class="subtab" data-vt="table">Table</button>
     </div>
     <div id="valQuiz">
       <div class="card">
@@ -300,6 +306,15 @@
         <div class="row">
           <button class="btn alt" id="valNext">New</button>
         </div>
+      </div>
+    </div>
+    <div id="valBoardWrap" style="display:none">
+      <div class="card">
+        <div class="prompt"><div class="label">Which value is highlighted?</div></div>
+        <div class="boardwrap"><svg id="qboard" class="quizboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
+        <div class="opts6" id="qOpts"></div>
+        <div class="hint info" id="qHint">&nbsp;</div>
+        <div class="row"><button class="btn alt" id="qNext">New</button></div>
       </div>
     </div>
     <div id="valTableWrap" style="display:none">
@@ -936,7 +951,38 @@ function chooseVal(v,btn){
   else { setHint('valHint','✗ '+valState.label+' = '+valState.value,'bad'); record(false,ms); setTimeout(newVal,1300); }
 }
 el('valNext').onclick=newVal;
-/* T·D sub-tabs: Quiz vs D/T table */
+
+/* ----- Board recognition quiz (highlight a double/treble -> pick value) ----- */
+let qMap=buildDartboard(el('qboard'), null);  // non-interactive board
+el('qboard').classList.add('dim');
+let qState={};
+function newQuiz(){
+  const treble = Math.random()<0.55;
+  const n = 1+rnd(20);
+  const token=(treble?'T':'D')+n, value=(treble?3:2)*n;
+  qState={token, value, options:valOptions(value), answered:false, t0:performance.now()};
+  Object.values(qMap).forEach(node=>node.classList.remove('hl'));
+  if(qMap[token]) qMap[token].classList.add('hl');
+  const box=el('qOpts'); box.innerHTML='';
+  qState.options.forEach(v=>{
+    const b=document.createElement('button'); b.type='button'; b.className='opt6'; b.textContent=v;
+    b.onclick=()=>chooseQuiz(v,b); box.appendChild(b);
+  });
+  setHint('qHint',' ','info');
+}
+function chooseQuiz(v,btn){
+  if(qState.answered) return; qState.answered=true;
+  const ms=performance.now()-qState.t0, ok=(v===qState.value);
+  [...el('qOpts').children].forEach(b=>{ b.disabled=true;
+    if(+b.textContent===qState.value) b.classList.add('right');
+    else if(b===btn) b.classList.add('wrong');
+  });
+  if(ok){ setHint('qHint','✓ '+qState.token+' = '+qState.value,'good'); record(true,ms); setTimeout(newQuiz,650); }
+  else { setHint('qHint','✗ '+qState.token+' = '+qState.value,'bad'); record(false,ms); setTimeout(newQuiz,1300); }
+}
+el('qNext').onclick=newQuiz;
+
+/* T·D sub-tabs */
 let valView = SETTINGS.valView || 'quiz';
 (function buildDTtable(){
   let h='<div class="dtrow dthead"><span>Dart</span><span>Treble</span><span>Double</span></div>';
@@ -948,8 +994,10 @@ function setValView(v){
   valView=v; SETTINGS.valView=v; saveSettings();
   document.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
   el('valQuiz').style.display = v==='quiz'?'':'none';
+  el('valBoardWrap').style.display = v==='board'?'':'none';
   el('valTableWrap').style.display = v==='table'?'':'none';
   if(v==='quiz') newVal();
+  if(v==='board') newQuiz();
   if(mode==='values') updateKeypad();
 }
 document.querySelectorAll('.subtab').forEach(b=> b.onclick=()=>setValView(b.dataset.vt));
@@ -1117,57 +1165,52 @@ document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return;
 });
 el('coRange').onchange=()=>{ SETTINGS.coRange=el('coRange').value; saveSettings(); newCo(); };
 
-/* ----- Build the dartboard SVG ------------------------------------- */
-(function buildBoard(){
-  const svg=el('board');
-  const order=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+/* ----- Build a dartboard SVG (reusable) ----------------------------- */
+const BOARD_ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+function buildDartboard(svg, onTap){
+  const order=BOARD_ORDER;
   const NS='http://www.w3.org/2000/svg';
-  // hit areas deliberately not to scale: treble & double rings widened to be easy to tap
   const R={ ibull:17, obull:38, sin:98, tin:124, sout:162, dout:190 };
   const BLACK='#27241d', CREAM='#e7d9b4', RED='#c9362a', GREEN='#2f8c4e';
-  // top-clockwise angle θ (deg) -> screen coords
   const pt=(deg,r)=>{ const a=deg*Math.PI/180; return [ (r*Math.sin(a)).toFixed(2), (-r*Math.cos(a)).toFixed(2) ]; };
   function ringSeg(ri,ro,a0,a1){
     const [x1,y1]=pt(a0,ri), [x2,y2]=pt(a0,ro), [x3,y3]=pt(a1,ro), [x4,y4]=pt(a1,ri);
     return `M${x1} ${y1} L${x2} ${y2} A${ro} ${ro} 0 0 1 ${x3} ${y3} L${x4} ${y4} A${ri} ${ri} 0 0 0 ${x1} ${y1} Z`;
   }
+  const map={};
+  function flash(node){ node.classList.add('flash'); setTimeout(()=>node.classList.remove('flash'),90); }
   function seg(d,fill,token){
     const p=document.createElementNS(NS,'path');
-    p.setAttribute('d',d); p.setAttribute('fill',fill);
-    p.addEventListener('click',()=>{ flash(p); addDart(token); });
-    svg.appendChild(p);
+    p.setAttribute('d',d); p.setAttribute('fill',fill); p.setAttribute('class','seg');
+    if(onTap) p.addEventListener('click',()=>{ flash(p); onTap(token); });
+    svg.appendChild(p); map[token]=p;
   }
-  function flash(node){ node.classList.add('flash'); setTimeout(()=>node.classList.remove('flash'),90); }
   order.forEach((n,i)=>{
     const c=i*18, a0=c-9, a1=c+9;
     const dark=(i%2===0);
     const single=dark?BLACK:CREAM, ring=dark?RED:GREEN;
     seg(ringSeg(R.obull,R.sin,a0,a1), single, String(n));   // inner single
     seg(ringSeg(R.sin,R.tin,a0,a1), ring, 'T'+n);           // treble
-    seg(ringSeg(R.tin,R.sout,a0,a1), single, String(n));    // outer single
+    seg(ringSeg(R.tin,R.sout,a0,a1), single, String(n));    // outer single  (overwrites map[n] -> fine)
     seg(ringSeg(R.sout,R.dout,a0,a1), ring, 'D'+n);         // double
   });
-  // bull
   const ob=document.createElementNS(NS,'circle'); ob.setAttribute('cx',0); ob.setAttribute('cy',0);
-  ob.setAttribute('r',R.obull); ob.setAttribute('fill',GREEN);
-  ob.addEventListener('click',()=>{ flash(ob); addDart('SB'); }); svg.appendChild(ob);
+  ob.setAttribute('r',R.obull); ob.setAttribute('fill',GREEN); ob.setAttribute('class','seg');
+  if(onTap) ob.addEventListener('click',()=>{ flash(ob); onTap('SB'); }); svg.appendChild(ob); map['SB']=ob;
   const ib=document.createElementNS(NS,'circle'); ib.setAttribute('cx',0); ib.setAttribute('cy',0);
-  ib.setAttribute('r',R.ibull); ib.setAttribute('fill',RED);
-  ib.addEventListener('click',()=>{ flash(ib); addDart('DB'); }); svg.appendChild(ib);
-  // ring wires (decorative)
+  ib.setAttribute('r',R.ibull); ib.setAttribute('fill',RED); ib.setAttribute('class','seg');
+  if(onTap) ib.addEventListener('click',()=>{ flash(ib); onTap('DB'); }); svg.appendChild(ib); map['DB']=ib;
   [R.obull,R.sin,R.tin,R.sout,R.dout].forEach(r=>{
     const c=document.createElementNS(NS,'circle'); c.setAttribute('class','wire');
     c.setAttribute('cx',0); c.setAttribute('cy',0); c.setAttribute('r',r); svg.appendChild(c);
   });
-  // numbers around the outside
   order.forEach((n,i)=>{
     const [x,y]=pt(i*18, R.dout+32);
     const t=document.createElementNS(NS,'text'); t.setAttribute('class','num');
     t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=n;
-    t.addEventListener('click',()=>{ flash(t); addDart(String(n)); });
+    if(onTap) t.addEventListener('click',()=>{ flash(t); onTap(String(n)); });
     svg.appendChild(t);
   });
-  // treble / double values overlaid on the rings (toggled by .showvals)
   const tMid=(R.sin+R.tin)/2, dMid=(R.sout+R.dout)/2;
   order.forEach((n,i)=>{
     [[3*n,tMid],[2*n,dMid]].forEach(([val,r])=>{
@@ -1176,7 +1219,9 @@ el('coRange').onchange=()=>{ SETTINGS.coRange=el('coRange').value; saveSettings(
       t.setAttribute('x',x); t.setAttribute('y',y); t.textContent=val; svg.appendChild(t);
     });
   });
-})();
+  return map;
+}
+buildDartboard(el('board'), addDart);
 el('coShowChart').onchange=e=>{ SETTINGS.coShowChart=e.target.checked; saveSettings(); el('chartCard').style.display=e.target.checked?'':'none'; };
 el('coShowVals').onchange=e=>{ SETTINGS.coShowVals=e.target.checked; saveSettings(); el('board').classList.toggle('showvals', e.target.checked); };
 
