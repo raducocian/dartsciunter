@@ -303,7 +303,7 @@
 
   <div class="opts" id="subOpts" style="display:none">
     <label>Darts shown
-      <select id="subDarts"><option value="1">1 dart</option><option value="2">2 darts</option><option value="3" selected>3 darts</option></select>
+      <select id="subDarts"><option value="rand" selected>random 1–3</option><option value="1">1 dart</option><option value="2">2 darts</option><option value="3">3 darts</option></select>
     </label>
     <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
   </div>
@@ -645,7 +645,8 @@ function renderSubThrows(ds){
   ds.forEach(d=>{ const s=document.createElement('span'); s.className='d3'+(d.cls?' '+d.cls:''); s.textContent=d.label; box.appendChild(s); });
 }
 function newSub(){
-  const n = +el('subDarts').value || 3;
+  const sel = el('subDarts').value;
+  const n = sel==='rand' ? 1+rnd(3) : (+sel||3);
   let score;
   if(el('subChain').checked && subState.chainScore && subState.chainScore>2){
     score = subState.chainScore;
