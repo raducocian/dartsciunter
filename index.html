@@ -57,10 +57,9 @@
     border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:1px}
   .tab.active{color:#fff;border-bottom-color:var(--neon);text-shadow:0 0 12px rgba(34,211,238,.55)}
   .tab:active{color:var(--txt)}
-  .streakrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  .cfgbtn{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:9px;
-    padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
-  .cfgbtn.on{color:var(--accent);border-color:rgba(34,211,238,.5)}
+  .streakrow{display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px}
+  .tab.cfg{font-size:18px;padding-left:12px;padding-right:6px}
+  .tab.cfg.on{color:var(--accent);border-bottom-color:var(--accent)}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
@@ -191,13 +190,11 @@
       <div class="tab" data-mode="round">R&amp;A</div>
       <div class="tab" data-mode="checkout">close</div>
       <div class="tab" data-mode="leg">full</div>
+      <div class="tab cfg" id="cfgBtn" title="Settings" aria-label="Settings">⚙</div>
     </nav>
   </header>
 
-  <div class="streakrow">
-    <button type="button" class="cfgbtn" id="cfgBtn">⚙ Settings</button>
-    <div class="pill" id="streakPill">Streak 0</div>
-  </div>
+  <div class="streakrow"><div class="pill" id="streakPill">Streak 0</div></div>
 
   <div class="card" id="configPanel" style="display:none">
     <div class="label" style="color:var(--muted);letter-spacing:1px;margin-bottom:6px">⚙ SETTINGS</div>
@@ -682,9 +679,9 @@ function renderLegCoach(force){
 }
 
 let mode='subtract';
-document.querySelectorAll('.tab').forEach(t=>{
+document.querySelectorAll('.tab[data-mode]').forEach(t=>{
   t.onclick=()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab[data-mode]').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     mode=t.dataset.mode;
     SETTINGS.mode=mode; saveSettings();
@@ -1203,7 +1200,7 @@ if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.ad
 renderStats(); renderProgress();
 (function(){
   const start=SETTINGS.mode||'subtract';
-  const tabsList=[...document.querySelectorAll('.tab')];
+  const tabsList=[...document.querySelectorAll('.tab[data-mode]')];
   const t=tabsList.find(x=>x.dataset.mode===start)||tabsList[0];
   t.onclick();   // runs the full mode-switch (display, new*, keypad, focus)
 })();
