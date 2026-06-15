@@ -64,6 +64,16 @@
   .iconbtn svg{width:22px;height:22px;fill:currentColor;display:block}
   .iconbtn:active{background:var(--panel2)}
   .iconbtn.on{color:var(--accent)}
+  .subtabs{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+  .subtab{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:9px;
+    padding:7px 16px;font-weight:700;font-size:13px;cursor:pointer}
+  .subtab.active{background:var(--accent);color:#04121f;border-color:var(--accent)}
+  .dttable{font-size:15px}
+  .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:7px 6px;border-bottom:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums}
+  .dtrow:last-child{border-bottom:none}
+  .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px}
+  .dtrow span:first-child{color:var(--accent);font-weight:800;text-align:left}
+  .dtrow .trbv{color:var(--accent2)}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
@@ -268,23 +278,32 @@
 
   <!-- ============ T·D VALUES ============ -->
   <section id="m-values" style="display:none">
-    <div class="card">
-      <div class="prompt">
-        <div class="label">Dart value</div>
-        <div class="big" id="valDart">T20</div>
-        <div class="sub">what's it worth?</div>
+    <div class="subtabs">
+      <button type="button" class="subtab active" data-vt="quiz">Quiz</button>
+      <button type="button" class="subtab" data-vt="table">D/T table</button>
+    </div>
+    <div id="valQuiz">
+      <div class="card">
+        <div class="prompt">
+          <div class="label">Dart value</div>
+          <div class="big" id="valDart">T20</div>
+          <div class="sub">what's it worth?</div>
+        </div>
+        <div class="coach hidden" id="valCoach">
+          <span class="k">Should be</span>
+          <span class="m" id="valCoachM"></span>
+          <span class="v" id="valCoachV"></span>
+        </div>
+        <input class="answer" id="valInput" inputmode="none" placeholder="value" />
+        <div class="hint info" id="valHint">&nbsp;</div>
+        <div class="row">
+          <button class="btn alt" id="valReveal">Reveal</button>
+          <button class="btn alt" id="valNext">New</button>
+        </div>
       </div>
-      <div class="coach hidden" id="valCoach">
-        <span class="k">Should be</span>
-        <span class="m" id="valCoachM"></span>
-        <span class="v" id="valCoachV"></span>
-      </div>
-      <input class="answer" id="valInput" inputmode="none" placeholder="value" />
-      <div class="hint info" id="valHint">&nbsp;</div>
-      <div class="row">
-        <button class="btn alt" id="valReveal">Reveal</button>
-        <button class="btn alt" id="valNext">New</button>
-      </div>
+    </div>
+    <div id="valTableWrap" style="display:none">
+      <div class="card"><div id="valTable" class="dttable"></div></div>
     </div>
   </section>
 
@@ -744,7 +763,7 @@ function focusActive(){
 function currentNumInput(){
   if(mode==='subtract') return el('subInput');
   if(mode==='adds') return el('addInput');
-  if(mode==='values') return el('valInput');
+  if(mode==='values') return valView==='quiz'?el('valInput'):null;
   if(mode==='round') return el('roundInput');
   if(mode==='leg' && leg.phase==='subtract') return el('legInput');
   return null;
@@ -912,6 +931,23 @@ function checkVal(){
 el('valNext').onclick=newVal;
 el('valReveal').onclick=()=> setHint('valHint',valState.label+' = '+valState.value,'info');
 el('valInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('valInput').className.includes('good')?newVal():checkVal()); });
+/* T·D sub-tabs: Quiz vs D/T table */
+let valView = SETTINGS.valView || 'quiz';
+(function buildDTtable(){
+  let h='<div class="dtrow dthead"><span>Dart</span><span>Treble</span><span>Double</span></div>';
+  for(let n=20;n>=1;n--) h+=`<div class="dtrow"><span>${n}</span><span class="trbv">${3*n}</span><span>${2*n}</span></div>`;
+  h+='<div class="dtrow"><span>Bull</span><span class="trbv">—</span><span>50</span></div>';
+  el('valTable').innerHTML=h;
+})();
+function setValView(v){
+  valView=v; SETTINGS.valView=v; saveSettings();
+  document.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
+  el('valQuiz').style.display = v==='quiz'?'':'none';
+  el('valTableWrap').style.display = v==='table'?'':'none';
+  if(v==='quiz') newVal();
+  if(mode==='values') updateKeypad();
+}
+document.querySelectorAll('.subtab').forEach(b=> b.onclick=()=>setValView(b.dataset.vt));
 
 /* ------------------------------------------------------------------ */
 /*  ROUND & ADJUST mode                                                */
@@ -1239,6 +1275,7 @@ renderStats(); renderProgress();
   const t=tabsList.find(x=>x.dataset.mode===start)||tabsList[0];
   t.onclick();   // runs the full mode-switch (display, new*, keypad, focus)
 })();
+setValView(valView);   // apply saved T·D sub-tab (Quiz / table)
 </script>
 </body>
 </html>
