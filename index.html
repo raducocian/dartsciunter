@@ -179,12 +179,6 @@
         <button class="btn alt" id="subNext">New</button>
       </div>
     </div>
-    <div class="opts">
-      <label>Darts per visit
-        <select id="subDarts"><option value="3">3 (full visit)</option><option value="1">1 (single dart)</option></select>
-      </label>
-      <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
-    </div>
   </section>
 
   <!-- ============ ADDS ============ -->
@@ -232,7 +226,7 @@
         </div>
         <div class="row">
           <button type="button" class="btn alt" id="coReveal">Reveal</button>
-          <button type="button" class="btn" id="coGo">Throw ▸</button>
+          <button type="button" class="btn alt" id="coGo">Throw ▸</button>
         </div>
       </div>
     </div>
@@ -295,6 +289,13 @@
     <button type="button" class="key del" data-k="del">⌫</button>
     <button type="button" class="key" data-k="0">0</button>
     <button type="button" class="key ok" data-k="ok">Enter</button>
+  </div>
+
+  <div class="opts" id="subOpts" style="display:none">
+    <label>Darts per visit
+      <select id="subDarts"><option value="3">3 (full visit)</option><option value="1">1 (single dart)</option></select>
+    </label>
+    <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
   </div>
 
   <div class="coachbar">
@@ -581,6 +582,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     mode=t.dataset.mode;
     SETTINGS.mode=mode; saveSettings();
     ['subtract','adds','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
+    el('subOpts').style.display = (mode==='subtract'?'':'none');
     if(mode==='subtract') newSub();
     if(mode==='adds') newAdd();
     if(mode==='checkout') newCo();
