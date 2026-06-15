@@ -1,32 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="dartboard">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="T20">
   <defs>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="4" result="b"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1424"/>
+      <stop offset="1" stop-color="#070b12"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#7c5cff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <g fill="none" stroke-linecap="butt">
-    <!-- schematic structure: rim, separators, radial wires -->
-    <g stroke="#9fb6cc" stroke-width="2" opacity="0.32">
-      <circle cx="256" cy="256" r="240"/>
-      <circle cx="256" cy="256" r="170"/>
-      <circle cx="256" cy="256" r="120"/>
-      <path d="M496 256L16 256 M484.3 330.2L27.7 181.8 M450.2 397.1L61.8 114.9 M397.1 450.2L114.9 61.8 M330.2 484.3L181.8 27.7 M256 496L256 16 M181.8 484.3L330.2 27.7 M114.9 450.2L397.1 61.8 M61.8 397.1L450.2 114.9 M27.7 330.2L484.3 181.8"/>
-    </g>
+  <rect width="512" height="512" rx="116" fill="url(#tile)"/>
+  <rect x="6" y="6" width="500" height="500" rx="112" fill="none" stroke="url(#neon)" stroke-width="3" opacity="0.5"/>
 
-    <!-- double & treble rings: alternating red / green segments -->
-    <g filter="url(#glow)" stroke-width="20">
-      <circle cx="256" cy="256" r="228" stroke="#ff5066" stroke-dasharray="71.63 71.63"/>
-      <circle cx="256" cy="256" r="228" stroke="#2ee6a6" stroke-dasharray="71.63 71.63" stroke-dashoffset="71.63"/>
-      <circle cx="256" cy="256" r="150" stroke="#ff5066" stroke-dasharray="47.12 47.12"/>
-      <circle cx="256" cy="256" r="150" stroke="#2ee6a6" stroke-dasharray="47.12 47.12" stroke-dashoffset="47.12"/>
-    </g>
-  </g>
-
-  <!-- bull -->
   <g filter="url(#glow)">
-    <circle cx="256" cy="256" r="34" fill="none" stroke="#2ee6a6" stroke-width="7"/>
-    <circle cx="256" cy="256" r="15" fill="#ff5066"/>
+    <!-- segmented neon ring -->
+    <circle cx="256" cy="256" r="188" fill="none" stroke="url(#neon)" stroke-width="10"
+            stroke-linecap="round" stroke-dasharray="64 26"/>
+    <circle cx="256" cy="256" r="150" fill="none" stroke="#22d3ee" stroke-width="3" opacity="0.45"/>
+    <!-- T20 -->
+    <text x="256" y="266" text-anchor="middle" dominant-baseline="central" fill="url(#neon)"
+          font-family="'Trebuchet MS','Arial Rounded MT Bold',Arial,sans-serif"
+          font-weight="800" font-size="176" letter-spacing="-8">T20</text>
   </g>
 </svg>
