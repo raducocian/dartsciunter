@@ -1039,8 +1039,8 @@ if(SETTINGS.qboardVals){ el('qShowVals').checked=true; el('qboard').classList.ad
 let valView = SETTINGS.valView || 'quiz';
 (function buildDTtable(){
   let h='<div class="dtrow dthead"><span>Dart</span><span>Treble</span><span>Double</span></div>';
-  for(let n=20;n>=1;n--) h+=`<div class="dtrow"><span>${n}</span><span class="trbv">${pad1(3*n)}</span><span>${pad1(2*n)}</span></div>`;
-  h+='<div class="dtrow"><span>Bull</span><span class="trbv">—</span><span>50</span></div>';
+  for(let n=20;n>=1;n--) h+=`<div class="dtrow"><span>${pad1(n)}</span><span class="trbv">${pad1(3*n)}</span><span>${pad1(2*n)}</span></div>`;
+  h+=`<div class="dtrow"><span>Bull</span><span class="trbv">${pad1('—')}</span><span>50</span></div>`;
   el('valTable').innerHTML=h;
 })();
 // how to hit 1..60 — show the segment to aim at (blank if impossible); all-blank rows shaded red
@@ -1059,7 +1059,7 @@ function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
     if(ord==='imp' && !imp) continue;        // only non-achievable numbers
     if(ord==='ach' && imp) continue;         // only achievable numbers
     const grp=(grouped && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
-    h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${n}</span><span>${pad1(s)}</span><span>${pad1(d)}</span><span>${pad1(t)}</span></div>`;
+    h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${pad1(n)}</span><span>${pad1(s)}</span><span>${pad1(d)}</span><span>${pad1(t)}</span></div>`;
   }
   el('valTable2').innerHTML=h;
 }
