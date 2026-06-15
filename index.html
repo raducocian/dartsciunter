@@ -483,6 +483,7 @@
 /* ------------------------------------------------------------------ */
 const rnd = n => Math.floor(Math.random()*n);
 const pick = a => a[rnd(a.length)];
+const BOARD_ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 
 // Generate a single realistic dart score (weighted toward 20-area trebles).
 function randomDart(){
@@ -1166,7 +1167,6 @@ document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return;
 el('coRange').onchange=()=>{ SETTINGS.coRange=el('coRange').value; saveSettings(); newCo(); };
 
 /* ----- Build a dartboard SVG (reusable) ----------------------------- */
-const BOARD_ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 function buildDartboard(svg, onTap){
   const order=BOARD_ORDER;
   const NS='http://www.w3.org/2000/svg';
