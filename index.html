@@ -174,7 +174,8 @@
       <div class="prompt">
         <div class="label">Score on</div>
         <div class="big" id="subScore">501</div>
-        <div class="sub">You threw <span class="visit" id="subVisit">—</span> this visit</div>
+        <div class="sub" style="margin-bottom:6px">subtract your throw</div>
+        <div class="darts3" id="subThrows"></div>
       </div>
       <div class="coach hidden" id="subCoach">
         <span class="k">Should be</span>
@@ -301,8 +302,8 @@
   </div>
 
   <div class="opts" id="subOpts" style="display:none">
-    <label>Darts per visit
-      <select id="subDarts"><option value="3">3 (full visit)</option><option value="1">1 (single dart)</option></select>
+    <label>Darts shown
+      <select id="subDarts"><option value="1">1 dart</option><option value="2">2 darts</option><option value="3" selected>3 darts</option></select>
     </label>
     <label><input type="checkbox" id="subChain" checked> Chain down a leg</label>
   </div>
@@ -631,19 +632,31 @@ el('keypad').addEventListener('click',e=>{
 /*  SUBTRACT mode                                                      */
 /* ------------------------------------------------------------------ */
 let subState={};
+function genThrows(score, n){ // n darts whose total won't bust (leaves >=2)
+  for(let t=0;t<50;t++){
+    const ds=[]; let sum=0;
+    for(let i=0;i<n;i++){ const d=randomDartLabel(); ds.push(d); sum+=d.value; }
+    if(sum<=score-2) return ds;
+  }
+  return Array.from({length:n},()=>({label:'1',value:1,cls:''})); // fallback small
+}
+function renderSubThrows(ds){
+  const box=el('subThrows'); box.innerHTML='';
+  ds.forEach(d=>{ const s=document.createElement('span'); s.className='d3'+(d.cls?' '+d.cls:''); s.textContent=d.label; box.appendChild(s); });
+}
 function newSub(){
-  const darts = +el('subDarts').value;
+  const n = +el('subDarts').value || 3;
   let score;
   if(el('subChain').checked && subState.chainScore && subState.chainScore>2){
     score = subState.chainScore;
   } else {
     score = pick([501,501,301,170,160,140,200,260,348,420]);
   }
-  let visit = darts===1 ? randomDart() : randomVisit(score);
-  if(visit>score-2 && score-2>=0) visit=Math.min(visit, score-2);
-  subState={score, visit, answer:score-visit, t0:performance.now()};
+  const ds = genThrows(score, n);
+  const visit = ds.reduce((s,d)=>s+d.value,0);
+  subState={score, visit, darts:ds, answer:score-visit, t0:performance.now()};
   el('subScore').textContent=score;
-  el('subVisit').textContent=visit;
+  renderSubThrows(ds);
   const inp=el('subInput'); inp.value=''; inp.className='answer';
   setHint('subHint',' ','info');
   renderSubCoach();
