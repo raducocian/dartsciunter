@@ -83,7 +83,6 @@
   /* quiz board: dim everything, spotlight the highlighted segment */
   /* quiz board: full colour like the others, spotlight the target segment */
   #qboard .seg.hl{stroke:#fff;stroke-width:6;filter:brightness(1.45) drop-shadow(0 0 6px #fff)}
-  #qboard .num{font-size:24px}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
@@ -172,14 +171,14 @@
   .coach .m{color:var(--muted);font-size:15px}
   .coach.hidden{display:none}
   /* dartboard */
-  .boardwrap{display:flex;justify-content:center;margin:6px 0 18px}
+  .boardwrap{display:flex;justify-content:center;margin:6px -12px 18px}
   svg#board.off{pointer-events:none;opacity:.38;filter:grayscale(.35)}
-  svg.dboard{width:320px;height:320px;max-width:88vw;max-height:88vw;touch-action:manipulation;
-    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 10px #15110c, 0 0 0 13px #2a2118}
+  svg.dboard{width:100%;height:auto;aspect-ratio:1/1;touch-action:manipulation;
+    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 4px #1a1209}
   .dboard path,.dboard circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
   .dboard path:active,.dboard circle:active,.dboard path.flash,.dboard circle.flash{filter:brightness(1.5)}
   .dboard .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
-  .dboard .num{fill:#f0e9d6;font-size:28px;font-weight:800;cursor:pointer;text-anchor:middle;
+  .dboard .num{fill:#f0e9d6;font-size:34px;font-weight:800;cursor:pointer;text-anchor:middle;
     dominant-baseline:central;font-family:Arial,Helvetica,sans-serif}
   .dboard .num:active{filter:brightness(1.6)}
   .dboard .segval{fill:#fff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;
