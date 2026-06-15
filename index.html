@@ -74,6 +74,12 @@
   .dtrow.dthead{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:1px}
   .dtrow span:first-child{color:var(--accent);font-weight:800;text-align:left}
   .dtrow .trbv{color:var(--accent2)}
+  .opts6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
+  .opt6{padding:18px 0;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    font-size:24px;font-weight:800;cursor:pointer;font-variant-numeric:tabular-nums}
+  .opt6:active{filter:brightness(1.3)}
+  .opt6.right{background:rgba(34,224,161,.22);border-color:var(--good);color:var(--good)}
+  .opt6.wrong{background:rgba(255,93,108,.2);border-color:var(--bad);color:var(--bad)}
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
@@ -287,17 +293,11 @@
         <div class="prompt">
           <div class="label">Dart value</div>
           <div class="big" id="valDart">T20</div>
-          <div class="sub">what's it worth?</div>
+          <div class="sub">tap the right value</div>
         </div>
-        <div class="coach hidden" id="valCoach">
-          <span class="k">Should be</span>
-          <span class="m" id="valCoachM"></span>
-          <span class="v" id="valCoachV"></span>
-        </div>
-        <input class="answer" id="valInput" inputmode="none" placeholder="value" />
+        <div class="opts6" id="valOpts"></div>
         <div class="hint info" id="valHint">&nbsp;</div>
         <div class="row">
-          <button class="btn alt" id="valReveal">Reveal</button>
           <button class="btn alt" id="valNext">New</button>
         </div>
       </div>
@@ -694,7 +694,6 @@ el('coachToggle').onchange = e=>{
 function refreshCoach(){
   if(mode==='subtract') renderSubCoach();
   if(mode==='adds') renderAddCoach();
-  if(mode==='values') renderValCoach();
   if(mode==='round') renderRoundCoach();
   if(mode==='checkout') renderCoCoach();
   if(mode==='leg') (leg.phase==='checkout'?renderCoCoach():renderLegCoach());
@@ -754,7 +753,6 @@ document.querySelectorAll('.tab[data-mode]').forEach(t=>{
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
   if(mode==='adds') el('addInput').focus();
-  if(mode==='values') el('valInput').focus();
   if(mode==='round') el('roundInput').focus();
   if(mode==='leg') el('legInput').focus();
 }
@@ -763,7 +761,7 @@ function focusActive(){
 function currentNumInput(){
   if(mode==='subtract') return el('subInput');
   if(mode==='adds') return el('addInput');
-  if(mode==='values') return valView==='quiz'?el('valInput'):null;
+  if(mode==='values') return null;   // T·D quiz uses multiple-choice buttons
   if(mode==='round') return el('roundInput');
   if(mode==='leg' && leg.phase==='subtract') return el('legInput');
   return null;
@@ -772,7 +770,6 @@ function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInpu
 function keypadSubmit(){
   if(mode==='subtract') (el('subInput').className.includes('good')?newSub():checkSub());
   else if(mode==='adds') (el('addInput').className.includes('good')?newAdd():checkAdd());
-  else if(mode==='values') (el('valInput').className.includes('good')?newVal():checkVal());
   else if(mode==='round') (el('roundInput').className.includes('good')?newRound():checkRound());
   else if(mode==='leg') checkLeg();
 }
@@ -902,35 +899,43 @@ function quizDart(){ // weighted toward the values worth memorizing
   const b=1+rnd(20); return {label:String(b), value:b};
 }
 let valState={};
-function renderValCoach(force){
-  const c=el('valCoach');
-  if((coachOn||force) && valState.value!=null){
-    c.classList.remove('hidden'); c.classList.toggle('miss', !!force);
-    el('valCoachM').textContent=valState.label+' =';
-    el('valCoachV').textContent=valState.value;
-  } else c.classList.add('hidden');
+function valOptions(answer){
+  const pool=new Set();
+  for(let n=1;n<=20;n++){ pool.add(3*n); pool.add(2*n); pool.add(n); }
+  pool.add(25); pool.add(50); pool.delete(answer);
+  const near=[...pool].sort((a,b)=>Math.abs(a-answer)-Math.abs(b-answer)).slice(0,14);
+  const picks=[]; while(picks.length<5 && near.length) picks.push(near.splice(rnd(near.length),1)[0]);
+  const opts=[answer,...picks];
+  for(let i=opts.length-1;i>0;i--){ const j=rnd(i+1); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+  return opts;
+}
+function renderValOpts(){
+  const box=el('valOpts'); box.innerHTML='';
+  valState.options.forEach(v=>{
+    const b=document.createElement('button'); b.type='button'; b.className='opt6'; b.textContent=v;
+    b.onclick=()=>chooseVal(v,b);
+    box.appendChild(b);
+  });
 }
 function newVal(){
   const d=quizDart();
-  valState={label:d.label, value:d.value, t0:performance.now()};
+  valState={label:d.label, value:d.value, options:valOptions(d.value), answered:false, t0:performance.now()};
   el('valDart').textContent=d.label;
-  const inp=el('valInput'); inp.value=''; inp.className='answer';
-  setHint('valHint',' ','info'); renderValCoach(); inp.focus();
+  renderValOpts();
+  setHint('valHint',' ','info');
 }
-function checkVal(){
-  const inp=el('valInput'); const v=inp.value.trim(); if(v==='') return;
-  const ms=performance.now()-valState.t0;
-  if(+v===valState.value){
-    inp.className='answer good'; setHint('valHint','✓ '+valState.label+' = '+valState.value,'good');
-    record(true,ms); setTimeout(newVal,550);
-  } else {
-    inp.className='answer bad'; setHint('valHint','✗ not '+v+' — see below','bad');
-    renderValCoach(true); record(false,ms);
-  }
+function chooseVal(v,btn){
+  if(valState.answered) return;
+  valState.answered=true;
+  const ms=performance.now()-valState.t0, ok=(v===valState.value);
+  [...el('valOpts').children].forEach(b=>{ b.disabled=true;
+    if(+b.textContent===valState.value) b.classList.add('right');
+    else if(b===btn) b.classList.add('wrong');
+  });
+  if(ok){ setHint('valHint','✓ '+valState.label+' = '+valState.value,'good'); record(true,ms); setTimeout(newVal,650); }
+  else { setHint('valHint','✗ '+valState.label+' = '+valState.value,'bad'); record(false,ms); setTimeout(newVal,1300); }
 }
 el('valNext').onclick=newVal;
-el('valReveal').onclick=()=> setHint('valHint',valState.label+' = '+valState.value,'info');
-el('valInput').addEventListener('keydown',e=>{ if(e.key==='Enter') (el('valInput').className.includes('good')?newVal():checkVal()); });
 /* T·D sub-tabs: Quiz vs D/T table */
 let valView = SETTINGS.valView || 'quiz';
 (function buildDTtable(){
