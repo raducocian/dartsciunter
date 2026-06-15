@@ -64,6 +64,15 @@
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;
     font-size:14.5px;color:var(--txt);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
+  .modal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:rgba(2,6,12,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade .18s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal-card{width:100%;max-width:360px;background:var(--panel2);border:1px solid var(--line);border-radius:16px;
+    padding:16px 18px;box-shadow:0 24px 70px rgba(0,0,0,.55);animation:pop .2s ease}
+  @keyframes pop{from{transform:translateY(10px) scale(.97);opacity:.6}to{transform:none;opacity:1}}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
+    font-weight:700;letter-spacing:1px;font-size:13px;color:var(--muted)}
+  .modal-x{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 8px 30px rgba(0,0,0,.45)}
@@ -197,15 +206,6 @@
 
   <div class="streakrow"><div class="pill" id="streakPill">Streak 0</div></div>
 
-  <div class="card" id="configPanel" style="display:none">
-    <div class="label" style="color:var(--muted);letter-spacing:1px;margin-bottom:6px">⚙ SETTINGS</div>
-    <label class="cfgrow">Light mode
-      <span class="switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></span>
-    </label>
-    <label class="cfgrow"><span>💡 Coach panel — show what it should be</span>
-      <span class="switch"><input type="checkbox" id="coachToggle" checked><span class="slider"></span></span>
-    </label>
-  </div>
 
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
@@ -415,6 +415,18 @@
   <p class="note" style="text-align:center">All stats are saved on this device. Reset <a href="#" id="resetStats">totals</a> · Clear <a href="#" id="resetHistory">history</a> · type answer + <span class="kbd">Enter</span></p>
 </div>
 
+<div id="configModal" class="modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head"><span>⚙ SETTINGS</span><button type="button" class="modal-x" id="cfgClose" aria-label="Close">✕</button></div>
+    <label class="cfgrow">Light mode
+      <span class="switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></span>
+    </label>
+    <label class="cfgrow"><span>💡 Coach panel — show what it should be</span>
+      <span class="switch"><input type="checkbox" id="coachToggle" checked><span class="slider"></span></span>
+    </label>
+  </div>
+</div>
+
 <div id="toast" class="toast" style="display:none"></div>
 
 <script>
@@ -619,11 +631,13 @@ function el(id){return document.getElementById(id);}
 const SETTINGS = JSON.parse(localStorage.getItem('dartsSettings')||'{}');
 function saveSettings(){ localStorage.setItem('dartsSettings', JSON.stringify(SETTINGS)); }
 
-/* ----- Config panel + theme ----------------------------------------- */
-el('cfgBtn').onclick=()=>{
-  const p=el('configPanel'); const show=p.style.display==='none';
-  p.style.display=show?'':'none'; el('cfgBtn').classList.toggle('on',show);
-};
+/* ----- Config modal + theme ----------------------------------------- */
+function openCfg(){ el('configModal').style.display='flex'; el('cfgBtn').classList.add('on'); }
+function closeCfg(){ el('configModal').style.display='none'; el('cfgBtn').classList.remove('on'); }
+el('cfgBtn').onclick=()=>{ el('configModal').style.display==='none'?openCfg():closeCfg(); };
+el('cfgClose').onclick=closeCfg;
+el('configModal').addEventListener('click',e=>{ if(e.target===el('configModal')) closeCfg(); }); // click backdrop
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeCfg(); });
 function applyTheme(light){ document.body.classList.toggle('light', !!light); }
 el('themeToggle').checked = SETTINGS.theme==='light';
 applyTheme(SETTINGS.theme==='light');
