@@ -820,21 +820,42 @@ function renderLegCoach(force){
 let mode='home';
 const SLUG={home:'home',checkout:'close',values:'td',subtract:'subtract',adds:'adds',round:'round',leg:'full'};
 const FROMSLUG=Object.fromEntries(Object.entries(SLUG).map(([k,v])=>[v,k]));
-function setHash(m){
-  if(m==='home'){ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }
-  else { const t='#'+SLUG[m]; if(location.hash!==t) location.hash=t; }
+const VSLUG={board:'board',table:'table',hit:'hit'};                 // quiz = default (no segment)
+const VFROM={notation:'quiz',board:'board',table:'table',hit:'hit'};
+const HSLUG={seq:'seq',grp:'digit',ach:'can',imp:'cant'};
+const HFROM={seq:'seq',digit:'grp',can:'ach',cant:'imp'};
+function curPath(){ // full hash path for the current mode + sub-tab + sub-sub-tab
+  if(mode==='home') return '';
+  if(mode!=='values') return SLUG[mode];
+  let p='td';
+  if(valView!=='quiz') p+='/'+(VSLUG[valView]||valView);
+  if(valView==='hit') p+='/'+(HSLUG[hitOrd]||hitOrd);
+  return p;
+}
+function setHash(){ const p=curPath();
+  if(!p){ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }
+  else { const t='#'+p; if(location.hash!==t) location.hash=t; }
+}
+function applyHash(){ // parse the URL hash into mode / valView / hitOrd, then show it
+  const parts=location.hash.replace(/^#/,'').split('/').filter(Boolean);
+  const m=FROMSLUG[parts[0]]||'home';
+  if(m==='values'){
+    valView = parts[1] ? (VFROM[parts[1]]||'quiz') : 'quiz';
+    if(valView==='hit') hitOrd = HFROM[parts[2]]||'seq';
+  }
+  selectMode(m, true);
 }
 function selectMode(m, fromHash){
   if(!SLUG[m]) m='home';
   mode=m;
-  if(!fromHash) setHash(m);
+  if(!fromHash) setHash();
   SETTINGS.mode=m; saveSettings();
   document.querySelectorAll('.tab[data-mode]').forEach(x=>x.classList.toggle('active', x.dataset.mode===m));
   ['home','subtract','adds','values','round','checkout','leg'].forEach(s=> el('m-'+s).style.display = (s===m?'':'none'));
   closeCardPops();
   if(m==='subtract') newSub();
   if(m==='adds') newAdd();
-  if(m==='values') newVal();
+  if(m==='values') setValView(valView, true);
   if(m==='round') newRound();
   if(m==='checkout') newCo();
   if(m==='leg') newLeg(true);
@@ -853,7 +874,7 @@ el('prev-adds').innerHTML=chipP('20')+chipP('T19')+chipP('D8');
 el('prev-round').innerHTML='<span class="mathprev">417 − 57</span>';
 el('logo').onclick=()=>selectMode('home');
 el('logo').style.cursor='pointer';
-window.addEventListener('hashchange',()=>{ const m=FROMSLUG[location.hash.slice(1)]||'home'; if(m!==mode) selectMode(m,true); });
+window.addEventListener('hashchange', applyHash);
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
   if(mode==='adds') el('addInput').focus();
@@ -1118,10 +1139,10 @@ document.querySelectorAll('.hittab').forEach(b=>{
   b.onclick=()=>{
     hitOrd=b.dataset.order; SETTINGS.hitOrder=hitOrd; saveSettings();
     document.querySelectorAll('.hittab').forEach(x=>x.classList.toggle('active',x===b));
-    buildHit(hitOrd);
+    buildHit(hitOrd); setHash();
   };
 });
-function setValView(v){
+function setValView(v, fromHash){
   valView=v; SETTINGS.valView=v; saveSettings();
   document.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
   el('valQuiz').style.display = v==='quiz'?'':'none';
@@ -1130,6 +1151,8 @@ function setValView(v){
   el('valHitWrap').style.display = v==='hit'?'':'none';
   if(v==='quiz') newVal();
   if(v==='board') newQuiz();
+  if(v==='hit'){ document.querySelectorAll('.hittab').forEach(x=>x.classList.toggle('active',x.dataset.order===hitOrd)); buildHit(hitOrd); }
+  if(!fromHash) setHash();
   if(mode==='values') updateKeypad();
 }
 document.querySelectorAll('.subtab').forEach(b=> b.onclick=()=>setValView(b.dataset.vt));
@@ -1465,8 +1488,8 @@ if(SETTINGS.coShowChart){ el('coShowChart').checked=true; el('chartCard').style.
 if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.add('showvals'); }
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
-setValView(valView);   // prep the T·D sub-view
-selectMode(FROMSLUG[location.hash.slice(1)]||'home', true);   // open the mode from the URL hash, else Home
+setValView(valView, true);   // prep the T·D sub-view (don't touch the hash yet)
+applyHash();   // open the mode + sub-tab + sub-sub-tab from the URL hash, else Home
 </script>
 </body>
 </html>
