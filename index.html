@@ -232,7 +232,9 @@
   .pday .v{width:104px;text-align:right;flex:0 0 auto;color:var(--txt);font-variant-numeric:tabular-nums}
   .pday.today .d{color:var(--accent);font-weight:800}
   /* adds mode 3-dart display */
-  .darts3{display:flex;gap:10px;justify-content:center;margin:10px 0 4px}
+  .darts3{display:flex;gap:10px;justify-content:center;margin:0}
+  .subline{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 4px}
+  .minussign{font-size:30px;font-weight:800;color:var(--accent);line-height:1}
   .d3{flex:1;max-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
     padding:14px 4px;font-size:30px;font-weight:800;text-align:center}
   .d3.dbl{border-color:var(--accent);color:var(--accent)}
@@ -288,7 +290,7 @@
 
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
-    <div class="card" style="position:relative">
+    <div class="card" style="position:relative;text-align:center">
       <button type="button" class="cardcfg" data-pop="subPop" aria-label="Options"></button>
       <div class="cardpop" id="subPop" style="display:none">
         <label class="cfgrow">Darts shown
@@ -297,10 +299,9 @@
         <label class="cfgrow">Chain down a leg <span class="switch"><input type="checkbox" id="subChain" checked><span class="slider"></span></span></label>
       </div>
       <div class="prompt">
-        <div class="label">Score on</div>
+        <div class="label">Count down</div>
         <div class="big" id="subScore">501</div>
-        <div class="sub" style="margin-bottom:6px">subtract your throw</div>
-        <div class="darts3" id="subThrows"></div>
+        <div class="subline"><span class="minussign">−</span><div class="darts3" id="subThrows"></div></div>
       </div>
       <div class="coach hidden" id="subCoach">
         <span class="k">Should be</span>
