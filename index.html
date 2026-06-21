@@ -734,13 +734,13 @@ el('statsClose').onclick=closeStats;
 el('statsModal').addEventListener('click',e=>{ if(e.target===el('statsModal')) closeStats(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeCfg(); closeStats(); } });
 function applyTheme(light){ document.body.classList.toggle('light', !!light); }
-el('themeToggle').checked = SETTINGS.theme==='light';
-applyTheme(SETTINGS.theme==='light');
+const startLight = SETTINGS.theme ? SETTINGS.theme==='light' : true;   // light is default
+el('themeToggle').checked = startLight;
+applyTheme(startLight);
 el('themeToggle').onchange=e=>{ SETTINGS.theme = e.target.checked?'light':'dark'; saveSettings(); applyTheme(e.target.checked); };
 
 /* ----- Coach panel ("Should be ...") shared across modes ----------- */
-let coachOn = SETTINGS.coach!==undefined ? SETTINGS.coach
-            : JSON.parse(localStorage.getItem('dartsCoach') ?? 'true'); // migrate old key
+let coachOn = SETTINGS.coach!==undefined ? SETTINGS.coach : false;     // coach off by default
 el('coachToggle').checked = coachOn;
 el('coachToggle').onchange = e=>{
   coachOn = e.target.checked;
