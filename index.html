@@ -174,19 +174,28 @@
   .hittab.active{color:var(--ink)}
   .hittab.active::after{content:"";position:absolute;left:0;right:0;bottom:1px;height:2.5px;background:var(--lime);border-radius:2px}
 
-  /* tables */
-  .dttable{font-size:15px}
-  .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:9px 6px 9px 12px;border-bottom:1px solid var(--line);
-    text-align:left;font-family:'JetBrains Mono',monospace;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
-  .dtrow:last-child{border-bottom:none}
-  .dtrow.dthead{font-weight:500;text-transform:uppercase;font-size:10px;letter-spacing:.1em;color:var(--mut);
-    position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
-  .dtrow span:first-child{color:var(--lime-d);font-weight:700}
-  .dtrow .trbv{color:var(--ink)}
-  .dtrow.cols4{grid-template-columns:.6fr 1fr 1fr 1fr}
-  .dtrow.imp{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+  /* reference tables (T·D Table + Hit 1–60) */
+  .dtlabel{display:flex;align-items:center;justify-content:space-between;margin:4px 4px 0;padding:0 2px}
+  .dtlabel .t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--ink)}
+  .dtlabel .m{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:11px;color:var(--mut)}
+  .dtwrap2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .dtcard{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .dttable{font-size:13px;border:1px solid var(--line);border-radius:12px}
+  .dtrow{display:grid;grid-template-columns:1fr 1fr 1fr;padding:7px 0;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-weight:500;font-variant-numeric:tabular-nums;color:var(--faint)}
+  .dtrow span{text-align:center}
+  .dtrow span:first-child{color:var(--ink);font-weight:600}
+  .dtrow.dthead{background:var(--ink);color:var(--bg);padding:8px 0;font-weight:600;font-size:10px;letter-spacing:.06em;
+    position:sticky;top:0;z-index:2;text-transform:none}
+  .dtrow.dthead span{color:var(--bg)}
+  .dtrow.dthead span.acc{color:var(--lime)}
+  .dttable > .dtrow.dthead{border-radius:11px 11px 0 0}
+  .dtcard .dtrow:not(.dthead):nth-child(even){background:var(--card)}
+  .dttable .dtrow:not(.dthead):nth-child(even){background:var(--card)}
+  .dtrow.cols4{grid-template-columns:.75fr 1fr 1fr 1fr}
+  .dtrow.imp{background:color-mix(in srgb,var(--bad) 14%,transparent)!important}
   .dtrow.imp span:first-child{color:var(--bad)}
-  .dtrow.grp{margin-top:14px;border-top:0}
+  .dtrow.grp{margin-top:12px;border-top:0}
   .dtsub{margin-bottom:6px}
 
   /* multiple-choice option buttons */
@@ -1230,10 +1239,15 @@ if(SETTINGS.qboardVals){ el('qShowVals').checked=true; el('qboard').classList.ad
 /* T·D sub-tabs */
 let valView = SETTINGS.valView || 'quiz';
 (function buildDTtable(){
-  let h='<div class="dtrow dthead"><span>Dart</span><span>Treble</span><span>Double</span></div>';
-  for(let n=20;n>=1;n--) h+=`<div class="dtrow"><span>${pad1(n)}</span><span class="trbv">${pad1(3*n)}</span><span>${pad1(2*n)}</span></div>`;
-  h+=`<div class="dtrow"><span>Bull</span><span class="trbv">${pad1('—')}</span><span>50</span></div>`;
-  el('valTable').innerHTML=h;
+  function card(lo,hi){
+    let h='<div class="dtrow dthead"><span>N</span><span class="acc">D</span><span class="acc">T</span></div>';
+    for(let n=lo;n<=hi;n++) h+=`<div class="dtrow"><span>${n}</span><span>${2*n}</span><span>${3*n}</span></div>`;
+    return '<div class="dtcard">'+h+'</div>';
+  }
+  el('valTable').innerHTML =
+    '<div class="dtlabel"><span class="t">Doubles &amp; trebles</span><span class="m">×2 · ×3</span></div>'
+    + '<div class="dtwrap2">'+card(1,10)+card(11,20)+'</div>'
+    + '<div class="note" style="text-align:center;margin-top:12px">Bull 25 · double bull 50</div>';
 })();
 // how to hit 1..60 — show the segment to aim at (blank if impossible); all-blank rows shaded red
 function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
@@ -1241,7 +1255,7 @@ function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
   let order=[];
   if(grouped){ for(let dig=0;dig<=9;dig++){ for(let n=1;n<=60;n++) if(n%10===dig) order.push(n); } }
   else { for(let n=1;n<=60;n++) order.push(n); }
-  let h='<div class="dtrow cols4 dthead"><span>N</span><span>Single</span><span>Double</span><span>Treble</span></div>';
+  let h='<div class="dtrow cols4 dthead"><span>N</span><span>Single</span><span class="acc">Double</span><span class="acc">Treble</span></div>';
   let prev=null;
   for(const n of order){
     const s=(n<=20)?n:(n===25?'B':'');
@@ -1251,7 +1265,7 @@ function buildHit(ord){ // ord: 'seq' | 'grp' | 'ach' | 'imp'
     if(ord==='imp' && !imp) continue;        // only non-achievable numbers
     if(ord==='ach' && imp) continue;         // only achievable numbers
     const grp=(grouped && prev!==null && (n%10)!==prev)?' grp':''; prev=n%10;
-    h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${pad1(n)}</span><span>${pad1(s)}</span><span>${pad1(d)}</span><span>${pad1(t)}</span></div>`;
+    h+=`<div class="dtrow cols4${imp?' imp':''}${grp}"><span>${n}</span><span>${s}</span><span>${d}</span><span>${t}</span></div>`;
   }
   el('valTable2').innerHTML=h;
 }
