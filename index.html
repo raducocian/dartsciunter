@@ -107,6 +107,14 @@
   .modal-x{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}
   .card{background:transparent;border:0;border-radius:0;padding:4px 2px 12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
   .sep{border:0;border-top:1px solid var(--line);margin:12px 0}
+  .hometitle{font-family:'Rajdhani',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:2px;
+    color:var(--muted);font-size:13px;margin:2px 0 12px}
+  .tilegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{display:flex;flex-direction:column;gap:5px;text-align:left;padding:16px 14px;border-radius:14px;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent)}
+  .tile:active{filter:brightness(1.12)}
+  .tile .tt{font-weight:800;font-size:17px;color:var(--txt)}
+  .tile .td{font-size:12px;color:var(--muted);line-height:1.35}
   .prompt{text-align:center;padding:2px 0}
   .prompt .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
   .big{font-size:46px;font-weight:800;line-height:1;margin:4px 0;
@@ -236,7 +244,7 @@
 <body>
 <div class="wrap">
   <header>
-    <img class="logo" src="icon.svg?v=15" width="62" height="62" alt="T20" />
+    <img class="logo" id="logo" src="icon.svg?v=15" width="62" height="62" alt="T20" title="Home" />
     <nav class="tabs">
       <div class="tab" data-mode="checkout">close</div>
       <div class="tab" data-mode="values">T·D</div>
@@ -259,6 +267,19 @@
     </div>
   </div>
 
+
+  <!-- ============ HOME ============ -->
+  <section id="m-home" style="display:none">
+    <div class="hometitle">Practice</div>
+    <div class="tilegrid">
+      <button type="button" class="tile" data-go="checkout"><span class="tt">Closings</span><span class="td">Finish a checkout on the board</span></button>
+      <button type="button" class="tile" data-go="values"><span class="tt">T·D values</span><span class="td">Doubles, trebles &amp; the board</span></button>
+      <button type="button" class="tile" data-go="subtract"><span class="tt">Subtract</span><span class="td">Count down from a score</span></button>
+      <button type="button" class="tile" data-go="adds"><span class="tt">Adds</span><span class="td">Total your three darts</span></button>
+      <button type="button" class="tile" data-go="round"><span class="tt">Round &amp; Adjust</span><span class="td">Mental-math drill</span></button>
+      <button type="button" class="tile" data-go="leg"><span class="tt">Full Leg</span><span class="td">Play a whole 501 leg</span></button>
+    </div>
+  </section>
 
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
@@ -787,25 +808,26 @@ function renderLegCoach(force){
   } else c.classList.add('hidden');
 }
 
-let mode='subtract';
-document.querySelectorAll('.tab[data-mode]').forEach(t=>{
-  t.onclick=()=>{
-    document.querySelectorAll('.tab[data-mode]').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    mode=t.dataset.mode;
-    SETTINGS.mode=mode; saveSettings();
-    ['subtract','adds','values','round','checkout','leg'].forEach(m=> el('m-'+m).style.display = (m===mode?'':'none'));
-    closeCardPops();
-    if(mode==='subtract') newSub();
-    if(mode==='adds') newAdd();
-    if(mode==='values') newVal();
-    if(mode==='round') newRound();
-    if(mode==='checkout') newCo();
-    if(mode==='leg') newLeg(true);
-    updateKeypad();
-    focusActive();
-  };
-});
+let mode='home';
+function selectMode(m){
+  mode=m;
+  SETTINGS.mode=m; saveSettings();
+  document.querySelectorAll('.tab[data-mode]').forEach(x=>x.classList.toggle('active', x.dataset.mode===m));
+  ['home','subtract','adds','values','round','checkout','leg'].forEach(s=> el('m-'+s).style.display = (s===m?'':'none'));
+  closeCardPops();
+  if(m==='subtract') newSub();
+  if(m==='adds') newAdd();
+  if(m==='values') newVal();
+  if(m==='round') newRound();
+  if(m==='checkout') newCo();
+  if(m==='leg') newLeg(true);
+  updateKeypad();
+  focusActive();
+}
+document.querySelectorAll('.tab[data-mode]').forEach(t=> t.onclick=()=>selectMode(t.dataset.mode));
+document.querySelectorAll('.tile').forEach(t=> t.onclick=()=>selectMode(t.dataset.go));
+el('logo').onclick=()=>selectMode('home');
+el('logo').style.cursor='pointer';
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
   if(mode==='adds') el('addInput').focus();
@@ -1417,13 +1439,8 @@ if(SETTINGS.coShowChart){ el('coShowChart').checked=true; el('chartCard').style.
 if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.add('showvals'); }
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
-(function(){
-  const start=SETTINGS.mode||'subtract';
-  const tabsList=[...document.querySelectorAll('.tab[data-mode]')];
-  const t=tabsList.find(x=>x.dataset.mode===start)||tabsList[0];
-  t.onclick();   // runs the full mode-switch (display, new*, keypad, focus)
-})();
-setValView(valView);   // apply saved T·D sub-tab (Quiz / table)
+setValView(valView);   // prep the T·D sub-view
+selectMode('home');    // land on the homepage grid
 </script>
 </body>
 </html>
