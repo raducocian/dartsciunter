@@ -829,8 +829,16 @@ function renderLegCoach(force){
 }
 
 let mode='home';
-function selectMode(m){
+const SLUG={home:'home',checkout:'close',values:'td',subtract:'subtract',adds:'adds',round:'round',leg:'full'};
+const FROMSLUG=Object.fromEntries(Object.entries(SLUG).map(([k,v])=>[v,k]));
+function setHash(m){
+  if(m==='home'){ if(location.hash) history.replaceState(null,'',location.pathname+location.search); }
+  else { const t='#'+SLUG[m]; if(location.hash!==t) location.hash=t; }
+}
+function selectMode(m, fromHash){
+  if(!SLUG[m]) m='home';
   mode=m;
+  if(!fromHash) setHash(m);
   SETTINGS.mode=m; saveSettings();
   document.querySelectorAll('.tab[data-mode]').forEach(x=>x.classList.toggle('active', x.dataset.mode===m));
   ['home','subtract','adds','values','round','checkout','leg'].forEach(s=> el('m-'+s).style.display = (s===m?'':'none'));
@@ -848,6 +856,7 @@ document.querySelectorAll('.tab[data-mode]').forEach(t=> t.onclick=()=>selectMod
 document.querySelectorAll('.tile').forEach(t=> t.onclick=()=>selectMode(t.dataset.go));
 el('logo').onclick=()=>selectMode('home');
 el('logo').style.cursor='pointer';
+window.addEventListener('hashchange',()=>{ const m=FROMSLUG[location.hash.slice(1)]||'home'; if(m!==mode) selectMode(m,true); });
 function focusActive(){
   if(mode==='subtract') el('subInput').focus();
   if(mode==='adds') el('addInput').focus();
@@ -1460,7 +1469,7 @@ if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.ad
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
 setValView(valView);   // prep the T·D sub-view
-selectMode('home');    // land on the homepage grid
+selectMode(FROMSLUG[location.hash.slice(1)]||'home', true);   // open the mode from the URL hash, else Home
 </script>
 </body>
 </html>
