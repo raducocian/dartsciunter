@@ -121,21 +121,38 @@
 
   /* ---- bottom nav ---- */
   .botnav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--navbg);border-top:1px solid var(--line2);
-    padding:8px 10px calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:0;
+    padding:10px 10px calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:0;
     max-width:460px;margin:0 auto}
-  .navi{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;cursor:pointer;padding:2px 0}
-  .navi .ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
-  .navi .ico svg{width:21px;height:21px;display:block}
-  .navi .ilabel{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:9.5px;color:var(--mut);white-space:nowrap}
-  .navi.active .ico{width:34px;height:30px;border-radius:9px;background:var(--lime);color:var(--lime-ink)}
+  .navi-wrap{flex:1;position:relative;display:flex}
+  .navi-wrap .navi{flex:1}
+  .navi{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;cursor:pointer;padding:2px 0}
+  .navi .ico{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+  .navi .ico svg{width:25px;height:25px;display:block}
+  .navi .ilabel{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11px;color:var(--mut);white-space:nowrap}
+  .navi.active .ico{width:42px;height:36px;border-radius:11px;background:var(--lime);color:var(--lime-ink)}
   .navi.active .ilabel{font-weight:700;color:var(--ink)}
-  .navi.home .ico{width:34px;height:30px;border-radius:9px;background:transparent}
+  .navi.home .ico{width:42px;height:36px;border-radius:11px;background:transparent}
   .navi.home.active .ico{background:var(--lime)}
-  .navdiv{width:1px;height:30px;background:var(--line2);margin:0 5px 17px;flex:0 0 auto}
-  .navutil{width:34px;display:flex;flex-direction:column;align-items:center;padding-bottom:17px;background:none;border:0;cursor:pointer}
-  .navutil .ico{width:28px;height:28px;color:var(--mut);display:flex;align-items:center;justify-content:center}
-  .navutil .ico svg{width:21px;height:21px;display:block}
+  .navdiv{width:1px;height:36px;background:var(--line2);margin:0 6px 20px;flex:0 0 auto}
+  .navutil{width:40px;display:flex;flex-direction:column;align-items:center;padding-bottom:20px;background:none;border:0;cursor:pointer}
+  .navutil .ico{width:34px;height:34px;color:var(--mut);display:flex;align-items:center;justify-content:center}
+  .navutil .ico svg{width:25px;height:25px;display:block}
   .navutil.on .ico{color:var(--lime-d)}
+  /* ± drop-up submenu (Subtract / Adds / Round) */
+  .navmenu{position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);z-index:50;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px;min-width:190px;
+    box-shadow:0 18px 44px rgba(20,24,28,.24);animation:pop .16s ease}
+  .navmenu::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%) rotate(45deg);
+    width:14px;height:14px;background:var(--card);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .navmenu-item{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;cursor:pointer;
+    padding:11px 12px;border-radius:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink);text-align:left}
+  .navmenu-item:active{background:var(--track)}
+  .navmenu-item.active{background:var(--track)}
+  .navmenu-item .mi-ico{width:32px;height:32px;border-radius:9px;background:var(--track);flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--lime-d)}
+  .navmenu-item.active .mi-ico{background:var(--lime);color:var(--lime-ink)}
+  .navmenu-item .mi-sub{font-family:'Hanken Grotesk',sans-serif;font-weight:500;font-size:11px;color:var(--mut2)}
+  .navmenu-item .mi-txt{display:flex;flex-direction:column;gap:2px;line-height:1.1}
 
   /* ---- HOME ---- */
   .homestats{display:flex;justify-content:space-between;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
@@ -621,10 +638,17 @@
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M12 12 L9.1 3.7 A9 9 0 0 1 14.9 3.7 Z" fill="currentColor" stroke="none"></path><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"></circle></svg></span>
     <span class="ilabel">T·D</span>
   </button>
-  <button type="button" class="navi" data-nav="math" aria-label="Subtract, Adds, Round">
-    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5 V12 M8.5 8.5 H15.5 M8.5 18 H15.5"></path></svg></span>
-    <span class="ilabel">±</span>
-  </button>
+  <div class="navi-wrap">
+    <button type="button" class="navi" data-nav="math" aria-label="Subtract, Adds, Round">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5 V12 M8.5 8.5 H15.5 M8.5 18 H15.5"></path></svg></span>
+      <span class="ilabel">±</span>
+    </button>
+    <div class="navmenu" id="mathMenu" style="display:none">
+      <button type="button" class="navmenu-item" data-go="subtract"><span class="mi-ico">−</span><span class="mi-txt">Subtract<span class="mi-sub">Count down</span></span></button>
+      <button type="button" class="navmenu-item" data-go="adds"><span class="mi-ico">+</span><span class="mi-txt">Adds<span class="mi-sub">Total three darts</span></span></button>
+      <button type="button" class="navmenu-item" data-go="round"><span class="mi-ico" style="font-size:12px">R&amp;A</span><span class="mi-txt">Round &amp; Adjust<span class="mi-sub">Mental math</span></span></button>
+    </div>
+  </div>
   <button type="button" class="navi" data-nav="leg" aria-label="Full Leg">
     <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 3 V21"></path><path d="M6.5 4 H17 L14 8 L17 12 H6.5" fill="currentColor" stroke="none"></path></svg></span>
     <span class="ilabel">Full Leg</span>
@@ -984,6 +1008,7 @@ function selectMode(m, fromHash){
   if(!fromHash) setHash();
   SETTINGS.mode=m; saveSettings();
   highlightNav(m);
+  closeMathMenu();
   ['home','subtract','adds','values','round','checkout','leg'].forEach(s=> el('m-'+s).style.display = (s===m?'':'none'));
   closeCardPops();
   if(m==='subtract') newSub();
@@ -999,10 +1024,19 @@ function selectMode(m, fromHash){
 const NAVFOR={home:'home',checkout:'checkout',values:'values',subtract:'math',adds:'math',round:'math',leg:'leg'};
 function highlightNav(m){ const slot=NAVFOR[m]||'home';
   document.querySelectorAll('.navi[data-nav]').forEach(x=>x.classList.toggle('active', x.dataset.nav===slot)); }
-document.querySelectorAll('.navi[data-nav]').forEach(t=> t.onclick=()=>{
-  const n=t.dataset.nav; selectMode(n==='math' ? (['subtract','adds','round'].includes(mode)?mode:'subtract') : n); });
-/* home list rows + resume card */
-document.querySelectorAll('[data-go]').forEach(t=> t.onclick=()=>selectMode(t.dataset.go));
+/* ± opens a drop-up submenu; the others navigate directly */
+function closeMathMenu(){ const m=el('mathMenu'); if(m) m.style.display='none'; }
+function openMathMenu(){ const m=el('mathMenu'); if(!m) return;
+  document.querySelectorAll('.navmenu-item').forEach(x=>x.classList.toggle('active', x.dataset.go===mode));
+  m.style.display=''; }
+document.querySelectorAll('.navi[data-nav]').forEach(t=> t.onclick=(e)=>{
+  const n=t.dataset.nav;
+  if(n==='math'){ e.stopPropagation(); const open=el('mathMenu').style.display==='none'; closeMathMenu(); if(open) openMathMenu(); return; }
+  closeMathMenu(); selectMode(n); });
+el('mathMenu').addEventListener('click', e=>e.stopPropagation());
+document.addEventListener('click', closeMathMenu);
+/* home list rows + resume card + ± submenu items */
+document.querySelectorAll('[data-go]').forEach(t=> t.onclick=()=>{ closeMathMenu(); selectMode(t.dataset.go); });
 el('logo').onclick=()=>selectMode('home');
 el('logo').style.cursor='pointer';
 /* resume-session card reflects the last drill used */
