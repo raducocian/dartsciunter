@@ -224,7 +224,7 @@
   .opt6:active{filter:brightness(.97)}
   .opt6.right{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
   .opt6.wrong{background:color-mix(in srgb,var(--bad) 16%,transparent);border-color:var(--bad);color:var(--bad)}
-  #qboard .seg.hl{stroke:#fff;stroke-width:6;filter:brightness(1.25) drop-shadow(0 0 6px rgba(255,255,255,.8))}
+  #qboard .seg.hl{fill:#c6f135;stroke:#c6f135;stroke-width:3;filter:drop-shadow(0 0 7px rgba(198,241,53,.7))}
 
   /* config rows + popovers */
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;
@@ -262,11 +262,11 @@
   .boardwrap{display:flex;justify-content:center;margin:8px 0 12px}
   svg#board.off{pointer-events:none;opacity:.4;filter:grayscale(.35)}
   svg.dboard{width:100%;height:auto;aspect-ratio:1/1;max-width:440px;touch-action:manipulation;
-    background:#0b0e13;border-radius:50%;box-shadow:0 0 0 6px #0b0e13}
-  .dboard path,.dboard circle{cursor:pointer;stroke:#0a0c10;stroke-width:1;transition:filter .05s}
+    background:#1c1a17;border-radius:50%;box-shadow:0 0 0 6px #1c1a17}
+  .dboard path,.dboard circle{cursor:pointer;stroke:#1c1a17;stroke-width:1;transition:filter .05s}
   .dboard path:active,.dboard circle:active,.dboard path.flash,.dboard circle.flash{filter:brightness(1.5)}
-  .dboard .wire{pointer-events:none;fill:none;stroke:#9aa3ad;stroke-width:1.1;opacity:.55}
-  .dboard .num{fill:#f0e9d6;font-size:38px;font-weight:700;cursor:pointer;text-anchor:middle;
+  .dboard .wire{pointer-events:none;fill:none;stroke:#8a857c;stroke-width:1.1;opacity:.6}
+  .dboard .num{fill:#efe7d2;font-size:38px;font-weight:700;cursor:pointer;text-anchor:middle;
     dominant-baseline:central;font-family:'Space Grotesk',Arial,sans-serif}
   .dboard .num:active{filter:brightness(1.6)}
   .dboard .segval{fill:#fff;font-size:17px;font-weight:700;text-anchor:middle;dominant-baseline:central;
@@ -1515,7 +1515,7 @@ function buildDartboard(svg, onTap){
   const order=BOARD_ORDER;
   const NS='http://www.w3.org/2000/svg';
   const R={ ibull:17, obull:38, sin:98, tin:124, sout:162, dout:190 };
-  const BLACK='#27241d', CREAM='#e7d9b4', RED='#c9362a', GREEN='#2f8c4e';
+  const BLACK='#1c1a17', CREAM='#efe7d2', RED='#c0392b', GREEN='#1f7a4d';
   const pt=(deg,r)=>{ const a=deg*Math.PI/180; return [ (r*Math.sin(a)).toFixed(2), (-r*Math.cos(a)).toFixed(2) ]; };
   function ringSeg(ri,ro,a0,a1){
     const [x1,y1]=pt(a0,ri), [x2,y2]=pt(a0,ro), [x3,y3]=pt(a1,ro), [x4,y4]=pt(a1,ri);
