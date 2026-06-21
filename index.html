@@ -57,7 +57,7 @@
     border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:1px}
   .tab.active{color:#fff;border-bottom-color:var(--neon);text-shadow:0 0 12px rgba(34,211,238,.55)}
   .tab:active{color:var(--txt)}
-  .streakrow{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:8px}
+  .streakrow{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
   .iconrow{display:flex;gap:4px}
   .iconbtn{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;line-height:0}
   .iconbtn svg{width:22px;height:22px;fill:currentColor;display:block}
@@ -265,19 +265,6 @@
       <div class="tab" data-mode="leg">full</div>
     </nav>
   </header>
-
-  <div class="streakrow">
-    <div class="pill" id="streakPill">Streak 0</div>
-    <div class="iconrow">
-      <button type="button" class="iconbtn" id="statsBtn" title="Stats" aria-label="Stats">
-        <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zM16.2 13H19v6h-2.8v-6z"/></svg>
-      </button>
-      <button type="button" class="iconbtn" id="cfgBtn" title="Settings" aria-label="Settings">
-        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      </button>
-    </div>
-  </div>
-
 
   <!-- ============ HOME ============ -->
   <section id="m-home" style="display:none">
@@ -508,6 +495,18 @@
     <button type="button" class="key del" data-k="del">⌫</button>
     <button type="button" class="key" data-k="0">0</button>
     <button type="button" class="key ok" data-k="ok">Enter</button>
+  </div>
+
+  <div class="streakrow">
+    <div class="pill" id="streakPill">Streak 0</div>
+    <div class="iconrow">
+      <button type="button" class="iconbtn" id="statsBtn" title="Stats" aria-label="Stats">
+        <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zM16.2 13H19v6h-2.8v-6z"/></svg>
+      </button>
+      <button type="button" class="iconbtn" id="cfgBtn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      </button>
+    </div>
   </div>
 
 </div>
