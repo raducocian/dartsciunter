@@ -235,6 +235,8 @@
   /* adds mode 3-dart display */
   .darts3{display:flex;gap:10px;justify-content:center;margin:0}
   .subline{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 4px}
+  .subline .darts3{flex:0 0 auto}
+  .subline .d3{flex:0 0 auto;max-width:none;min-width:62px;padding:12px 18px}
   .minussign{font-size:30px;font-weight:800;color:var(--accent);line-height:1}
   .d3{flex:1;max-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
     padding:14px 4px;font-size:30px;font-weight:800;text-align:center}
@@ -280,12 +282,12 @@
   <section id="m-home" style="display:none">
     <div class="hometitle">Practice</div>
     <div class="tilegrid">
-      <button type="button" class="tile" data-go="checkout"><span class="tprev"><svg class="dboard tileboard" id="tboard-checkout" viewBox="-244 -244 488 488" aria-hidden="true"></svg></span><span class="tt">Closings</span><span class="td">Finish a checkout on the board</span></button>
+      <button type="button" class="tile" data-go="checkout"><span class="tprev"><svg class="dboard tileboard" id="tboard-checkout" viewBox="-203 -203 406 406" aria-hidden="true"></svg></span><span class="tt">Closings</span><span class="td">Finish a checkout on the board</span></button>
       <button type="button" class="tile" data-go="values"><span class="tprev" id="prev-values"></span><span class="tt">T·D values</span><span class="td">Doubles, trebles &amp; the board</span></button>
       <button type="button" class="tile" data-go="subtract"><span class="tprev" id="prev-subtract"></span><span class="tt">Subtract</span><span class="td">Count down from a score</span></button>
       <button type="button" class="tile" data-go="adds"><span class="tprev" id="prev-adds"></span><span class="tt">Adds</span><span class="td">Total your three darts</span></button>
       <button type="button" class="tile" data-go="round"><span class="tprev" id="prev-round"></span><span class="tt">Round &amp; Adjust</span><span class="td">Mental-math drill</span></button>
-      <button type="button" class="tile" data-go="leg"><span class="tprev"><svg class="dboard tileboard" id="tboard-leg" viewBox="-244 -244 488 488" aria-hidden="true"></svg></span><span class="tt">Full Leg</span><span class="td">Play a whole 501 leg</span></button>
+      <button type="button" class="tile" data-go="leg"><span class="tprev"><svg class="dboard tileboard" id="tboard-leg" viewBox="-203 -203 406 406" aria-hidden="true"></svg></span><span class="tt">Full Leg</span><span class="td">Play a whole 501 leg</span></button>
     </div>
   </section>
 
