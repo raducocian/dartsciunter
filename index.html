@@ -54,10 +54,8 @@
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding-top:6px}
   .brand{display:flex;align-items:center;gap:13px;cursor:pointer}
   .logo{display:block;flex:0 0 auto;width:46px;height:46px;border-radius:12px}
-  .brandtxt .eyebrow{color:var(--mut)}
-  .brandtxt .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;line-height:1;
-    color:var(--ink);letter-spacing:-.03em;margin-top:5px}
-  .brandtxt .name b{color:var(--lime-d);font-weight:700}
+  .brandtxt{display:flex;flex-direction:column;justify-content:center;gap:3px}
+  .brandtxt .eyebrow{color:var(--mut);font-size:12px;letter-spacing:.14em}
   .gearbtn{width:38px;height:38px;border-radius:11px;background:var(--ink);color:var(--bg);border:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
   .gearbtn svg{width:19px;height:19px;fill:currentColor;display:block}
@@ -354,8 +352,8 @@
     <div class="brand" id="logo" title="Home">
       <img class="logo" src="icon.svg?v=17" width="46" height="46" alt="Darts Trainer" />
       <span class="brandtxt">
-        <span class="eyebrow">Counter / Trainer</span>
-        <span class="name">Darts<b>.</b></span>
+        <span class="eyebrow">Darts Counter</span>
+        <span class="eyebrow">Trainer</span>
       </span>
     </div>
   </header>
