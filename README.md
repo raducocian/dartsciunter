@@ -1,4 +1,4 @@
-# 🎯 T20 — Darts Trainer
+# 🎯 Darts Trainer
 
 A self-contained web app for the core darts-counting skills:
 

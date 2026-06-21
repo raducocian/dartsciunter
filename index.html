@@ -3,20 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>T20 · Darts Trainer</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='5' y='5' width='54' height='54' rx='15' fill='%231c1a17'/%3E%3Ccircle cx='32' cy='32' r='11.5' fill='%23c6f135'/%3E%3C/svg%3E" />
-<link rel="apple-touch-icon" href="icon.svg?v=16" />
+<title>Darts Trainer</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg?v=17" />
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=17" />
+<link rel="icon" type="image/png" sizes="16x16" href="icon-16.png?v=17" />
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=17" />
 <link rel="manifest" href="manifest.webmanifest" />
 <meta name="theme-color" content="#f4f2ec" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#1c1a17" media="(prefers-color-scheme: dark)" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-title" content="T20" />
+<meta name="apple-mobile-web-app-title" content="Darts" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <style>
-  /* ============ T20 · Oche — "Lime" design system ============ */
+  /* ============ Darts Trainer — Oche "Lime" design system ============ */
   body{
     /* dark theme (default vars) */
     --bg:#1c1a17; --board:#161310; --card:#211e1a; --navbg:#1a1714;
@@ -51,9 +53,7 @@
   /* ---- top brand bar ---- */
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;padding-top:6px}
   .brand{display:flex;align-items:center;gap:13px;cursor:pointer}
-  .logo{display:flex;align-items:center;justify-content:center;flex:0 0 auto;
-    width:46px;height:46px;border-radius:13px;background:#1c1a17;padding:0;box-shadow:none}
-  .logo .dot{width:18px;height:18px;border-radius:50%;background:var(--lime);display:block}
+  .logo{display:block;flex:0 0 auto;width:46px;height:46px;border-radius:12px}
   .brandtxt .eyebrow{color:var(--mut)}
   .brandtxt .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;line-height:1;
     color:var(--ink);letter-spacing:-.03em;margin-top:5px}
@@ -335,10 +335,10 @@
 <div class="wrap">
   <header>
     <div class="brand" id="logo" title="Home">
-      <span class="logo"><span class="dot"></span></span>
+      <img class="logo" src="icon.svg?v=17" width="46" height="46" alt="Darts Trainer" />
       <span class="brandtxt">
-        <span class="eyebrow">Darts / Trainer</span>
-        <span class="name">T20<b>.</b></span>
+        <span class="eyebrow">Counter / Trainer</span>
+        <span class="name">Darts<b>.</b></span>
       </span>
     </div>
   </header>
