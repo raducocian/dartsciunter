@@ -62,8 +62,8 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
   .gearbtn svg{width:19px;height:19px;fill:currentColor;display:block}
 
-  /* ---- per-screen header (back + title + meta) ---- */
-  .shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  /* ---- per-screen header (back + title + options) ---- */
+  .shead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;position:relative}
   .shead .stitle{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;
     text-transform:uppercase;color:var(--ink);cursor:pointer;background:none;border:none;padding:0}
   .shead .smeta{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:11px;letter-spacing:.12em;color:var(--mut)}
@@ -194,10 +194,11 @@
   .cfgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;
     font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:var(--ink);border-bottom:1px solid var(--line)}
   .cfgrow:last-child{border-bottom:none}
-  .cardcfg{position:absolute;top:4px;right:0;background:none;border:none;color:var(--mut);cursor:pointer;padding:6px;line-height:0;z-index:5}
-  .cardcfg svg{width:20px;height:20px;fill:currentColor;display:block}
-  .cardcfg.on{color:var(--lime-d)}
-  .cardpop{position:absolute;top:34px;right:0;z-index:20;background:var(--card);border:1px solid var(--line);
+  .cardcfg{flex:0 0 auto;width:32px;height:32px;border-radius:9px;border:1px solid var(--line3);background:none;
+    color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .cardcfg svg{width:16px;height:16px;fill:currentColor;display:block}
+  .cardcfg.on{color:var(--lime-d);border-color:var(--lime-d)}
+  .cardpop{position:absolute;top:40px;right:0;z-index:20;background:var(--card);border:1px solid var(--line);
     border-radius:14px;padding:6px 14px;box-shadow:0 14px 34px rgba(20,24,28,.18);min-width:230px}
 
   /* toggle switch */
@@ -345,8 +346,8 @@
 
   <!-- ============ SUBTRACT ============ -->
   <section id="m-subtract">
-    <div class="shead"><button type="button" class="stitle" data-go="home">‹ Subtract</button></div>
-    <div class="card" style="position:relative;text-align:center">
+    <div class="shead">
+      <button type="button" class="stitle" data-go="home">‹ Subtract</button>
       <button type="button" class="cardcfg" data-pop="subPop" aria-label="Options"></button>
       <div class="cardpop" id="subPop" style="display:none">
         <label class="cfgrow">Darts shown
@@ -354,6 +355,8 @@
         </label>
         <label class="cfgrow">Chain down a leg <span class="switch"><input type="checkbox" id="subChain" checked><span class="slider"></span></span></label>
       </div>
+    </div>
+    <div class="card" style="position:relative;text-align:center">
       <div class="prompt">
         <div class="label">Count down</div>
         <div class="big" id="subScore">501</div>
@@ -375,12 +378,14 @@
 
   <!-- ============ ADDS ============ -->
   <section id="m-adds" style="display:none">
-    <div class="shead"><button type="button" class="stitle" data-go="home">‹ Adds</button></div>
-    <div class="card" style="position:relative">
+    <div class="shead">
+      <button type="button" class="stitle" data-go="home">‹ Adds</button>
       <button type="button" class="cardcfg" data-pop="addPop" aria-label="Options"></button>
       <div class="cardpop" id="addPop" style="display:none">
         <label class="cfgrow">Show each dart's value <span class="switch"><input type="checkbox" id="addValues"><span class="slider"></span></span></label>
       </div>
+    </div>
+    <div class="card" style="position:relative">
       <div class="prompt">
         <div class="label">Total the three darts</div>
         <div class="darts3" id="addDarts"><span class="d3"></span><span class="d3"></span><span class="d3"></span></div>
@@ -401,7 +406,15 @@
 
   <!-- ============ T·D VALUES ============ -->
   <section id="m-values" style="display:none">
-    <div class="shead"><button type="button" class="stitle" data-go="home">‹ T·D Values</button></div>
+    <div class="shead">
+      <button type="button" class="stitle" data-go="home">‹ T·D Values</button>
+      <button type="button" class="cardcfg" id="qCfgBtn" data-pop="qPop" aria-label="Options" style="display:none"></button>
+      <div class="cardpop" id="qPop" style="display:none">
+        <label class="cfgrow">Reveal D/T values
+          <span class="switch"><input type="checkbox" id="qShowVals"><span class="slider"></span></span>
+        </label>
+      </div>
+    </div>
     <div class="subtabs">
       <button type="button" class="subtab" data-vt="board">Board</button>
       <button type="button" class="subtab" data-vt="hit">Hit</button>
@@ -424,12 +437,6 @@
     </div>
     <div id="valBoardWrap" style="display:none">
       <div class="card" style="position:relative">
-        <button type="button" class="cardcfg" data-pop="qPop" aria-label="Options"></button>
-        <div class="cardpop" id="qPop" style="display:none">
-          <label class="cfgrow">Reveal D/T values
-            <span class="switch"><input type="checkbox" id="qShowVals"><span class="slider"></span></span>
-          </label>
-        </div>
         <div class="prompt"><div class="label">Which value is highlighted?</div></div>
         <div class="boardwrap"><svg id="qboard" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
         <div class="opts6" id="qOpts"></div>
@@ -455,14 +462,16 @@
 
   <!-- ============ ROUND & ADJUST ============ -->
   <section id="m-round" style="display:none">
-    <div class="shead"><button type="button" class="stitle" data-go="home">‹ Round &amp; Adjust</button></div>
-    <div class="card" style="position:relative">
+    <div class="shead">
+      <button type="button" class="stitle" data-go="home">‹ Round &amp; Adjust</button>
       <button type="button" class="cardcfg" data-pop="roundPop" aria-label="Options"></button>
       <div class="cardpop" id="roundPop" style="display:none">
         <label class="cfgrow">Practice
           <select id="roundOp"><option value="mixed" selected>mixed</option><option value="sub">subtract only</option><option value="add">add only</option></select>
         </label>
       </div>
+    </div>
+    <div class="card" style="position:relative">
       <div class="prompt">
         <div class="label">Round &amp; adjust</div>
         <div class="big" id="roundQ">417 − 57</div>
@@ -483,8 +492,8 @@
 
   <!-- ============ CHECKOUT ============ -->
   <section id="m-checkout" style="display:none">
-    <div class="shead"><button type="button" class="stitle" data-go="home">‹ Closings</button></div>
-    <div class="card" id="coHome" style="position:relative">
+    <div class="shead">
+      <button type="button" class="stitle" data-go="home">‹ Closings</button>
       <button type="button" class="cardcfg" data-pop="coPop" aria-label="Options"></button>
       <div class="cardpop" id="coPop" style="display:none">
         <label class="cfgrow">Range
@@ -498,6 +507,8 @@
         <label class="cfgrow">Show chart <span class="switch"><input type="checkbox" id="coShowChart"><span class="slider"></span></span></label>
         <label class="cfgrow">Show D/T values <span class="switch"><input type="checkbox" id="coShowVals"><span class="slider"></span></span></label>
       </div>
+    </div>
+    <div class="card" id="coHome" style="position:relative">
       <div class="prompt">
         <div class="label">Checkout from</div>
         <div class="big" id="coScore">—</div>
@@ -1248,6 +1259,8 @@ function setValView(v, fromHash){
   el('valBoardWrap').style.display = v==='board'?'':'none';
   el('valTableWrap').style.display = v==='table'?'':'none';
   el('valHitWrap').style.display = v==='hit'?'':'none';
+  el('qCfgBtn').style.display = v==='board'?'':'none';   // board is the only T·D sub-view with options
+  if(v!=='board') closeCardPops();
   if(v==='quiz') newVal();
   if(v==='board') newQuiz();
   if(v==='hit'){ document.querySelectorAll('.hittab').forEach(x=>x.classList.toggle('active',x.dataset.order===hitOrd)); buildHit(hitOrd); }
