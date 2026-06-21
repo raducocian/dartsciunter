@@ -160,17 +160,19 @@
   .hometitle{margin:4px 0 12px}
 
   /* sub-tabs / hit-tabs (segmented) */
-  /* level-2 T·D sub-tabs: filled segmented control */
-  .subtabs{display:flex;gap:5px;background:var(--track);border-radius:13px;padding:5px;margin-bottom:14px}
-  .subtab{flex:1;background:none;border:0;border-radius:8px;cursor:pointer;height:34px;padding:0 4px;
+  /* T·D tab group: level-2 segmented row + nested level-3 row in one pill */
+  .tabgroup{background:var(--track);border:1px solid var(--line2);border-radius:13px;padding:5px;margin-bottom:14px}
+  .subtabs{display:flex;gap:4px;background:none;border-radius:0;padding:0;margin:0}
+  .subtab{flex:1;background:none;border:0;border-radius:8px;cursor:pointer;height:33px;padding:0 4px;
     font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11.5px;color:var(--mut2);white-space:nowrap}
   .subtab.active{background:var(--ink);color:var(--bg);font-weight:700}
+  .tabdiv{height:1px;background:var(--line3);margin:6px 7px}
   /* level-3 Hit sub-sub-tabs: centred text tabs with lime underline */
-  .hittabs{display:flex;justify-content:center;gap:18px;background:none;border-radius:0;padding:4px 4px 8px;margin-bottom:8px}
-  .hittab{flex:0 0 auto;background:none;border:0;padding:5px 2px;position:relative;cursor:pointer;
-    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;color:var(--mut2);white-space:nowrap}
+  .hittabs{display:flex;justify-content:center;gap:16px;background:none;border-radius:0;padding:4px 9px 5px;margin:0}
+  .hittab{flex:0 0 auto;background:none;border:0;padding:4px 2px 7px;position:relative;cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;color:var(--mut2);white-space:nowrap}
   .hittab.active{color:var(--ink)}
-  .hittab.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.5px;background:var(--lime);border-radius:2px}
+  .hittab.active::after{content:"";position:absolute;left:0;right:0;bottom:1px;height:2.5px;background:var(--lime);border-radius:2px}
 
   /* tables */
   .dttable{font-size:15px}
@@ -421,11 +423,22 @@
         </label>
       </div>
     </div>
-    <div class="subtabs">
-      <button type="button" class="subtab" data-vt="board">Board</button>
-      <button type="button" class="subtab" data-vt="hit">Hit</button>
-      <button type="button" class="subtab" data-vt="table">Table</button>
-      <button type="button" class="subtab active" data-vt="quiz">Notation</button>
+    <div class="tabgroup">
+      <div class="subtabs">
+        <button type="button" class="subtab" data-vt="board">Board</button>
+        <button type="button" class="subtab" data-vt="hit">Hit</button>
+        <button type="button" class="subtab" data-vt="table">Table</button>
+        <button type="button" class="subtab active" data-vt="quiz">Notation</button>
+      </div>
+      <div id="hitsubrow" style="display:none">
+        <div class="tabdiv"></div>
+        <div class="hittabs">
+          <button type="button" class="hittab" data-order="grp">by digit</button>
+          <button type="button" class="hittab active" data-order="seq">seq</button>
+          <button type="button" class="hittab" data-order="ach">can hit</button>
+          <button type="button" class="hittab" data-order="imp">can't hit</button>
+        </div>
+      </div>
     </div>
     <div id="valQuiz">
       <div class="card">
@@ -455,12 +468,6 @@
     </div>
     <div id="valHitWrap" style="display:none">
       <div class="card">
-        <div class="hittabs">
-          <button type="button" class="hittab active" data-order="seq">1–60</button>
-          <button type="button" class="hittab" data-order="grp">by digit</button>
-          <button type="button" class="hittab" data-order="ach">can hit</button>
-          <button type="button" class="hittab" data-order="imp">can't hit</button>
-        </div>
         <div id="valTable2" class="dttable"></div>
       </div>
     </div>
@@ -1265,6 +1272,7 @@ function setValView(v, fromHash){
   el('valBoardWrap').style.display = v==='board'?'':'none';
   el('valTableWrap').style.display = v==='table'?'':'none';
   el('valHitWrap').style.display = v==='hit'?'':'none';
+  el('hitsubrow').style.display = v==='hit'?'':'none';   // level-3 row nests under the sub-tabs only for Hit
   el('qCfgBtn').style.display = v==='board'?'':'none';   // board is the only T·D sub-view with options
   if(v!=='board') closeCardPops();
   if(v==='quiz') newVal();
