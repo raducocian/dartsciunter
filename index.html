@@ -295,8 +295,8 @@
   .chartbar .cb-arr{display:inline-block;margin-left:4px;transition:transform .18s ease}
   .chartbar[aria-expanded="true"] .cb-arr{transform:rotate(180deg)}
   .chartbar[aria-expanded="true"]{border-bottom-color:transparent}
-  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:0 14px;
-    font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px}
+  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:0 14px;
+    font-family:'JetBrains Mono',monospace;font-size:13.8px;margin-top:10px}
   .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;
     padding:7px 2px;display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
   .chart .c span{color:var(--ink);font-weight:700}
@@ -1682,7 +1682,7 @@ if(SETTINGS.subChain!==undefined) el('subChain').checked=SETTINGS.subChain;
 if(SETTINGS.coRange!==undefined) el('coRange').value=SETTINGS.coRange;
 if(SETTINGS.roundOp!==undefined) el('roundOp').value=SETTINGS.roundOp;
 if(SETTINGS.addValues!==undefined) el('addValues').checked=SETTINGS.addValues;
-setChart(!!SETTINGS.coShowChart);
+setChart(SETTINGS.coShowChart===undefined ? true : !!SETTINGS.coShowChart);   // open by default
 if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.add('showvals'); }
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
