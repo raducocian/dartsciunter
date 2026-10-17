@@ -295,6 +295,14 @@
   .chartbar .cb-arr{display:inline-block;margin-left:4px;transition:transform .18s ease}
   .chartbar[aria-expanded="true"] .cb-arr{transform:rotate(180deg)}
   .chartbar[aria-expanded="true"]{border-bottom-color:transparent}
+  .fstep{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .fstep button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line3);background:none;
+    color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .fstep button:active{background:var(--track)}
+  .fstep button:disabled{opacity:.3;cursor:default}
+  .fstep .fv{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:11px;color:var(--mut);
+    min-width:36px;text-align:center}
   .chart{display:grid;grid-template-columns:1fr;gap:0;
     font-family:'JetBrains Mono',monospace;font-size:18px;margin-top:10px}
   .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;
@@ -586,7 +594,14 @@
       <span class="cb-m">2–170 <span class="cb-arr">▾</span></span>
     </button>
     <div class="card" id="chartCard" style="display:none">
-      <div class="dtlabel"><span class="t">Standard finishes</span><span class="m">PDC card</span></div>
+      <div class="dtlabel">
+        <span class="t">Standard finishes</span>
+        <span class="fstep">
+          <button type="button" id="fsDown" aria-label="Smaller text">−</button>
+          <span class="fv" id="fsVal">18px</span>
+          <button type="button" id="fsUp" aria-label="Larger text">+</button>
+        </span>
+      </div>
       <div class="chart" id="chart"></div>
       <div class="note" style="text-align:center">Last dart must be a double · 169, 168, 166, 165, 163, 162 and 159 can't be finished in three darts</div>
     </div>
@@ -1683,6 +1698,20 @@ if(SETTINGS.coRange!==undefined) el('coRange').value=SETTINGS.coRange;
 if(SETTINGS.roundOp!==undefined) el('roundOp').value=SETTINGS.roundOp;
 if(SETTINGS.addValues!==undefined) el('addValues').checked=SETTINGS.addValues;
 setChart(SETTINGS.coShowChart===undefined ? true : !!SETTINGS.coShowChart);   // open by default
+/* chart text size stepper */
+const CH_MIN=12, CH_MAX=30;
+let chartFs = SETTINGS.chartFs || 18;
+function applyChartFs(){
+  chartFs = Math.max(CH_MIN, Math.min(CH_MAX, chartFs));
+  el('chart').style.fontSize = chartFs+'px';
+  el('fsVal').textContent = chartFs+'px';
+  el('fsDown').disabled = chartFs<=CH_MIN;
+  el('fsUp').disabled = chartFs>=CH_MAX;
+  SETTINGS.chartFs = chartFs; saveSettings();
+}
+el('fsDown').onclick=()=>{ chartFs--; applyChartFs(); };
+el('fsUp').onclick=()=>{ chartFs++; applyChartFs(); };
+applyChartFs();
 if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.add('showvals'); }
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
