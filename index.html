@@ -286,9 +286,21 @@
   .chip.dbl,.chip.trb{background:transparent;border:1.5px solid var(--lime-d);color:var(--lime-d)}
 
   /* checkout range segmented (uses select normally; chart) */
-  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;font-family:'JetBrains Mono',monospace;font-size:13px}
-  .chart .c{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 10px;display:flex;justify-content:space-between}
-  .chart .c b{color:var(--lime-d)}
+  /* checkout chart — dense PDC-card style list */
+  .chartbar{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;
+    border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 2px;
+    margin:4px 0 0;cursor:pointer;text-align:left}
+  .chartbar .cb-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--ink)}
+  .chartbar .cb-m{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:11px;letter-spacing:.12em;color:var(--mut)}
+  .chartbar .cb-arr{display:inline-block;margin-left:4px;transition:transform .18s ease}
+  .chartbar[aria-expanded="true"] .cb-arr{transform:rotate(180deg)}
+  .chartbar[aria-expanded="true"]{border-bottom-color:transparent}
+  .chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:0 14px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px}
+  .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;
+    padding:7px 2px;display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
+  .chart .c span{color:var(--ink);font-weight:700}
+  .chart .c b{color:var(--lime-d);font-weight:500}
   .leg-board{display:flex;justify-content:center;gap:9px;margin-bottom:8px}
   .pill{font-family:'JetBrains Mono',monospace;font-weight:500;background:var(--track);border:0;border-radius:20px;
     padding:6px 13px;font-size:12px;letter-spacing:.06em;color:var(--mut2)}
@@ -547,7 +559,6 @@
             <option value="all">Anything (2–170)</option>
           </select>
         </label>
-        <label class="cfgrow">Show chart <span class="switch"><input type="checkbox" id="coShowChart"><span class="slider"></span></span></label>
         <label class="cfgrow">Show D/T values <span class="switch"><input type="checkbox" id="coShowVals"><span class="slider"></span></span></label>
       </div>
     </div>
@@ -570,9 +581,14 @@
         </div>
       </div>
     </div>
+    <button type="button" class="chartbar" id="chartToggle" aria-expanded="false">
+      <span class="cb-t">Checkout chart</span>
+      <span class="cb-m">2–170 <span class="cb-arr">▾</span></span>
+    </button>
     <div class="card" id="chartCard" style="display:none">
-      <div class="label" style="color:var(--mut);margin-bottom:8px;letter-spacing:1px">STANDARD CHECKOUT CHART</div>
+      <div class="dtlabel"><span class="t">Standard finishes</span><span class="m">PDC card</span></div>
       <div class="chart" id="chart"></div>
+      <div class="note" style="text-align:center">Last dart must be a double · 169, 168, 166, 165, 163, 162 and 159 can't be finished in three darts</div>
     </div>
   </section>
 
@@ -1569,7 +1585,10 @@ function buildDartboard(svg, onTap){
   return map;
 }
 buildDartboard(el('board'), addDart);
-el('coShowChart').onchange=e=>{ SETTINGS.coShowChart=e.target.checked; saveSettings(); el('chartCard').style.display=e.target.checked?'':'none'; };
+function setChart(on){ SETTINGS.coShowChart=!!on; saveSettings();
+  el('chartCard').style.display = on?'':'none';
+  el('chartToggle').setAttribute('aria-expanded', on?'true':'false'); }
+el('chartToggle').onclick=()=>setChart(el('chartCard').style.display==='none');
 el('coShowVals').onchange=e=>{ SETTINGS.coShowVals=e.target.checked; saveSettings(); el('board').classList.toggle('showvals', e.target.checked); };
 
 // build chart
@@ -1663,7 +1682,7 @@ if(SETTINGS.subChain!==undefined) el('subChain').checked=SETTINGS.subChain;
 if(SETTINGS.coRange!==undefined) el('coRange').value=SETTINGS.coRange;
 if(SETTINGS.roundOp!==undefined) el('roundOp').value=SETTINGS.roundOp;
 if(SETTINGS.addValues!==undefined) el('addValues').checked=SETTINGS.addValues;
-if(SETTINGS.coShowChart){ el('coShowChart').checked=true; el('chartCard').style.display=''; }
+setChart(!!SETTINGS.coShowChart);
 if(SETTINGS.coShowVals){ el('coShowVals').checked=true; el('board').classList.add('showvals'); }
 el('coReveal').classList.toggle('on', revealOn);
 renderStats(); renderProgress();
