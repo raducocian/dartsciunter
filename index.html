@@ -305,10 +305,11 @@
     min-width:36px;text-align:center}
   .chart{display:grid;grid-template-columns:1fr;gap:0;
     font-family:'JetBrains Mono',monospace;font-size:18px;margin-top:10px}
-  .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;
-    padding:10px 2px;display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
-  .chart .c span{color:var(--ink);font-weight:700}
-  .chart .c b{color:var(--lime-d);font-weight:500}
+  .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 2px;
+    display:grid;grid-template-columns:2.3em repeat(3,minmax(0,2.9em));justify-content:start;
+    gap:0 8px;align-items:center;font-variant-numeric:tabular-nums}
+  .chart .c .sc{color:var(--ink);font-weight:700;text-align:right}
+  .chart .c b{color:var(--lime-d);font-weight:500;text-align:left}
   .leg-board{display:flex;justify-content:center;gap:9px;margin-bottom:8px}
   .pill{font-family:'JetBrains Mono',monospace;font-weight:500;background:var(--track);border:0;border-radius:20px;
     padding:6px 13px;font-size:12px;letter-spacing:.06em;color:var(--mut2)}
@@ -1609,7 +1610,13 @@ el('coShowVals').onchange=e=>{ SETTINGS.coShowVals=e.target.checked; saveSetting
 // build chart
 (function(){
   const c=el('chart'); let html='';
-  for(let s=170;s>=2;s--){ if(STANDARD[s]) html+=`<div class="c"><span>${s}</span><b>${STANDARD[s]}</b></div>`; }
+  for(let s=170;s>=2;s--){
+    if(!STANDARD[s]) continue;
+    const d=STANDARD[s].split(' ');            // one column per dart, in throwing order
+    html+=`<div class="c"><span class="sc">${s}</span>`
+       + [0,1,2].map(i=>`<b>${d[i]||''}</b>`).join('')
+       + `</div>`;
+  }
   c.innerHTML=html;
 })();
 
