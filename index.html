@@ -306,9 +306,9 @@
   .chart{display:grid;grid-template-columns:1fr;gap:0;
     font-family:'JetBrains Mono',monospace;font-size:18px;margin-top:10px}
   .chart .c{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 2px;
-    display:grid;grid-template-columns:2.3em repeat(3,minmax(0,2.9em));justify-content:start;
+    display:grid;grid-template-columns:minmax(0,3.1em) repeat(3,minmax(0,2.9em));justify-content:start;
     gap:0 8px;align-items:center;font-variant-numeric:tabular-nums}
-  .chart .c .sc{color:var(--ink);font-weight:700;text-align:right}
+  .chart .c .sc{color:var(--ink);font-weight:700;text-align:right;padding-right:.7em}
   .chart .c b{color:var(--lime-d);font-weight:500;text-align:left}
   .leg-board{display:flex;justify-content:center;gap:9px;margin-bottom:8px}
   .pill{font-family:'JetBrains Mono',monospace;font-weight:500;background:var(--track);border:0;border-radius:20px;
