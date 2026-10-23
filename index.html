@@ -611,6 +611,7 @@
           <button type="button" class="btn alt fix" id="pSame">Same</button>
           <button type="button" class="btn" id="pNext">New number</button>
         </div>
+        <div id="pKeypadSlot"></div>
       </div>
       <div class="rangewrap">
         <div class="eyebrow">Range</div>
@@ -690,6 +691,7 @@
     </div>
   </section>
 
+  <div id="keypadHome">
   <div id="keypad" class="keypad hidden">
     <button type="button" class="key" data-k="1">1</button>
     <button type="button" class="key" data-k="2">2</button>
@@ -703,6 +705,7 @@
     <button type="button" class="key del" data-k="del">⌫</button>
     <button type="button" class="key" data-k="0">0</button>
     <button type="button" class="key ok" data-k="ok">Enter</button>
+  </div>
   </div>
 
   <span id="streakPill" style="display:none"></span>
@@ -1105,6 +1108,7 @@ function selectMode(m, fromHash){
   if(m==='adds') newAdd();
   if(m==='values') setValView(valView, true);
   if(m==='round') newRound();
+  if(m!=='checkout') moveKeypad(false);          // keypad back to its usual place
   if(m==='checkout') setCoView(coView, true);
   if(m==='leg') newLeg(true);
   updateKeypad();
@@ -1154,6 +1158,12 @@ function currentNumInput(){
   return null;
 }
 function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInput()); }
+/* the keypad is shared and normally sits after the sections; in Closings·Play the
+   chart lives below the section, so move it up into the card to keep it in view */
+function moveKeypad(intoPlay){
+  const kp=el('keypad'), target=el(intoPlay?'pKeypadSlot':'keypadHome');
+  if(kp.parentNode!==target) target.appendChild(kp);
+}
 function keypadSubmit(){
   if(mode==='subtract') (el('subInput').className.includes('good')?newSub():checkSub());
   else if(mode==='adds') (el('addInput').className.includes('good')?newAdd():checkAdd());
@@ -1631,6 +1641,7 @@ function renderPlay(){
   const c=el('pCoach');
   if(coachOn && !play.solved){ c.classList.remove('hidden'); el('pCoachV').textContent=standardCheckout(play.score)||'no 3-dart out'; }
   else c.classList.add('hidden');
+  updateKeypad();                      // hide the keys once closed, bring them back on replay
 }
 function playEnter(){
   if(play.solved) return;
@@ -1663,6 +1674,7 @@ function setCoView(v, fromHash){
   el('coHome').style.display   = coView==='practice' ? '' : 'none';
   el('coPlayWrap').style.display = coView==='play' ? '' : 'none';
   if(coView==='practice') newCo(); else if(!play.start) newPlay(); else renderPlay();
+  moveKeypad(coView==='play');
   updateKeypad();
   if(!fromHash) setHash();
 }
