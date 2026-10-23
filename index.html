@@ -318,6 +318,8 @@
   .chart .c .sc{color:var(--ink);font-weight:700;text-align:right;padding-right:.7em}
   .chart .c b{color:var(--lime-d);font-weight:500;text-align:left}
   .chart .c.dec{margin-top:12px}
+  .chart .c[data-s]{cursor:pointer}
+  .chart .c[data-s]:active{background:var(--track)}
   .leg-board{display:flex;justify-content:center;gap:9px;margin-bottom:8px}
   .pill{font-family:'JetBrains Mono',monospace;font-weight:500;background:var(--track);border:0;border-radius:20px;
     padding:6px 13px;font-size:12px;letter-spacing:.06em;color:var(--mut2)}
@@ -592,18 +594,22 @@
         <div class="prompt">
           <div class="label">Playing from <span id="pStart">—</span></div>
           <div class="big" id="pScore">—</div>
-          <div class="sub">Visit <b id="pVisit">1</b> · darts <b id="pDarts">0</b></div>
+          <div class="sub">Visit <b id="pVisit">1</b></div>
         </div>
         <div class="coach hidden" id="pCoach">
           <span class="k">Standard out</span>
           <span class="v" id="pCoachV"></span>
         </div>
         <div class="combo" id="pCombo"></div>
+        <input class="answer" id="pInput" inputmode="none" placeholder="score thrown" autocomplete="off" />
         <div class="hint info" id="pHint">&nbsp;</div>
-        <div class="boardwrap"><svg id="pboard" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
-        <div class="row">
+        <div class="row" id="pRow">
           <button type="button" class="btn alt fix" id="pNew">New</button>
           <button type="button" class="btn" id="pReveal">Show out</button>
+        </div>
+        <div class="row" id="pDoneRow" style="display:none">
+          <button type="button" class="btn alt fix" id="pSame">Same</button>
+          <button type="button" class="btn" id="pNext">New number</button>
         </div>
       </div>
       <div class="rangewrap">
@@ -1134,6 +1140,7 @@ function focusActive(){
   if(mode==='adds') el('addInput').focus();
   if(mode==='round') el('roundInput').focus();
   if(mode==='leg') el('legInput').focus();
+  if(mode==='checkout' && coView==='play' && !play.solved) el('pInput').focus();
 }
 
 /* ----- shared on-screen number keypad ----- */
@@ -1143,6 +1150,7 @@ function currentNumInput(){
   if(mode==='values') return null;   // T·D quiz uses multiple-choice buttons
   if(mode==='round') return el('roundInput');
   if(mode==='leg' && leg.phase==='subtract') return el('legInput');
+  if(mode==='checkout' && coView==='play' && !play.solved) return el('pInput');
   return null;
 }
 function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInput()); }
@@ -1151,6 +1159,7 @@ function keypadSubmit(){
   else if(mode==='adds') (el('addInput').className.includes('good')?newAdd():checkAdd());
   else if(mode==='round') (el('roundInput').className.includes('good')?newRound():checkRound());
   else if(mode==='leg') checkLeg();
+  else if(mode==='checkout' && coView==='play') playEnter();
 }
 el('keypad').addEventListener('click',e=>{
   const b=e.target.closest('.key'); if(!b) return;
@@ -1595,82 +1604,85 @@ el('coGo').onclick=checkCo;
 /* ------------------------------------------------------------------ */
 let play={};
 function playRange(){ return SETTINGS.playRange || 'mid'; }
-function playSum(){ const r=parseCheckout(play.tokens.join(' ')); return (!play.tokens.length||r.error)?0:r.sum; }
-function playRem(){ return play.visitStart - playSum(); }
-function newPlay(){
-  const s=randomCheckout(playRange());
-  play={start:s, visitStart:s, visit:1, darts:0, tokens:[], solved:false, t0:performance.now()};
-  setHint('pHint','Tap the board — finish on a double','info');
-  renderPlay();
+function startPlay(score){
+  play={start:score, score:score, visit:1, thrown:[], solved:false, t0:performance.now()};
+  el('pInput').value='';
+  setHint('pHint','Type what you scored, then Enter','info');
+  renderPlay(); focusActive();
 }
+function newPlay(){ startPlay(randomCheckout(playRange())); }
 function renderPlay(){
   el('pStart').textContent=play.start;
-  el('pScore').textContent=playRem();
+  el('pScore').textContent=play.score;
   el('pVisit').textContent=play.visit;
-  el('pDarts').textContent=play.darts;
   document.querySelectorAll('#pRange button').forEach(b=>b.classList.toggle('active', b.dataset.r===playRange()));
-  // dart chips for the visit in progress (tap one to undo it)
+  el('pRow').style.display     = play.solved ? 'none' : '';
+  el('pDoneRow').style.display = play.solved ? '' : 'none';
+  el('pInput').style.display   = play.solved ? 'none' : '';
+  // log of visit scores so far
   const box=el('pCombo'); box.innerHTML='';
-  if(!play.tokens.length){
+  if(!play.thrown.length){
     const e=document.createElement('span'); e.className='empty';
-    e.textContent = play.solved ? 'closed!' : 'visit '+play.visit+' — 3 darts';
+    e.textContent = play.solved ? 'closed!' : 'no visits yet';
     box.appendChild(e);
-  } else play.tokens.forEach((t,i)=>{
-    const s=document.createElement('span');
-    const dbl=/^D/.test(t)||t==='DB', trb=/^T/.test(t);
-    s.className='chip'+(dbl?' dbl':'')+(trb?' trb':'');
-    s.innerHTML=t+'<span class="x">✕</span>'; s.title='tap to undo';
-    s.addEventListener('click',()=>{ if(play.solved) return; play.tokens.splice(i,1); play.darts--; renderPlay(); });
-    box.appendChild(s);
+  } else play.thrown.forEach(v=>{
+    const s=document.createElement('span'); s.className='chip'; s.textContent=v; box.appendChild(s);
   });
-  // coach: the standard out for what's left
   const c=el('pCoach');
-  if(coachOn && !play.solved){ c.classList.remove('hidden'); el('pCoachV').textContent=standardCheckout(playRem())||'no 3-dart out'; }
+  if(coachOn && !play.solved){ c.classList.remove('hidden'); el('pCoachV').textContent=standardCheckout(play.score)||'no 3-dart out'; }
   else c.classList.add('hidden');
 }
-function playDart(tok){
-  if(play.solved || play.tokens.length>=3) return;
-  const next=play.tokens.concat([tok]);
-  const r=parseCheckout(next.join(' '));
-  if(r.error) return;
-  play.tokens=next; play.darts++;
-  const rem=play.visitStart-r.sum;
-  if(rem===0 && r.finishesDouble){ playWin(); return; }
-  if(rem<0 || rem===1 || (rem===0 && !r.finishesDouble)){   // bust — visit void
-    setHint('pHint','Bust · back to '+play.visitStart,'bad');
-    play.tokens=[]; play.visit++; renderPlay(); return;
+function playEnter(){
+  if(play.solved) return;
+  const raw=el('pInput').value.trim();
+  if(!raw) return;
+  const v=parseInt(raw,10);
+  el('pInput').value='';
+  if(isNaN(v)||v<0||v>180){ setHint('pHint','Enter a score 0–180','bad'); return; }
+  const rem=play.score-v;
+  if(rem<0 || rem===1){                       // bust — visit void, score stands
+    play.visit++; setHint('pHint','Bust · still '+play.score,'bad'); renderPlay(); return;
   }
-  if(play.tokens.length>=3){                                // visit done, carry the remainder
-    play.visitStart=rem; play.tokens=[]; play.visit++;
-    setHint('pHint',rem+' left','info');
-  }
+  play.thrown.push(v);
+  if(rem===0){ playWin(); return; }
+  play.score=rem; play.visit++;
+  setHint('pHint',rem+' left','info');
   renderPlay();
 }
 function playWin(){
-  play.solved=true;
+  play.solved=true; play.score=0;
   record(true, performance.now()-play.t0);
-  setHint('pHint','✓ Closed from '+play.start+' in '+play.darts+' darts','good');
+  const n=play.thrown.length;
+  setHint('pHint','✓ Closed from '+play.start+' in '+n+' visit'+(n===1?'':'s'),'good');
   renderPlay(); renderStats();
-  setTimeout(()=>{ if(play.solved) newPlay(); }, 1900);
 }
-buildDartboard(el('pboard'), playDart);
 function setCoView(v, fromHash){
   coView = (v==='play') ? 'play' : 'practice';
   SETTINGS.coView=coView; saveSettings();
   document.querySelectorAll('.subtab[data-ct]').forEach(x=>x.classList.toggle('active', x.dataset.ct===coView));
   el('coHome').style.display   = coView==='practice' ? '' : 'none';
   el('coPlayWrap').style.display = coView==='play' ? '' : 'none';
-  if(coView==='practice') newCo(); else if(!play.start || play.solved) newPlay(); else renderPlay();
+  if(coView==='practice') newCo(); else if(!play.start) newPlay(); else renderPlay();
+  updateKeypad();
   if(!fromHash) setHash();
 }
 document.querySelectorAll('.subtab[data-ct]').forEach(b=> b.onclick=()=>setCoView(b.dataset.ct));
 el('pNew').onclick=()=>newPlay();
+el('pSame').onclick=()=>startPlay(play.start);      // replay the same starting number
+el('pNext').onclick=()=>newPlay();
 el('pReveal').onclick=()=>{
-  const left=playRem(), out=standardCheckout(left);
-  setHint('pHint', out ? ('From '+left+': '+out) : ('No 3-dart out from '+left), 'info');
+  const out=standardCheckout(play.score);
+  setHint('pHint', out ? ('From '+play.score+': '+out) : ('No 3-dart out from '+play.score), 'info');
 };
+el('pInput').addEventListener('keydown',e=>{ if(e.key==='Enter') playEnter(); });
 document.querySelectorAll('#pRange button').forEach(b=> b.onclick=()=>{
   SETTINGS.playRange=b.dataset.r; saveSettings(); newPlay();
+});
+/* tap any row in the checkout chart to play that finish */
+el('chart').addEventListener('click', e=>{
+  const row=e.target.closest('.c'); if(!row||!row.dataset.s) return;
+  setCoView('play'); startPlay(+row.dataset.s);
+  el('coPlayWrap').scrollIntoView({behavior:'smooth', block:'start'});
 });
 el('coReveal').onclick=()=>setReveal(!revealOn);
 document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return;
@@ -1750,7 +1762,7 @@ el('coShowVals').onchange=e=>{ SETTINGS.coShowVals=e.target.checked; saveSetting
     const dec=Math.floor(s/10);                // breathing room at each tens boundary
     const brk=(prevDec!==null && dec!==prevDec) ? ' dec' : '';
     prevDec=dec;
-    html+=`<div class="c${brk}"><span class="sc">${s}</span>`
+    html+=`<div class="c${brk}" data-s="${s}" title="play from ${s}"><span class="sc">${s}</span>`
        + [0,1,2].map(i=>`<b>${d[i]||''}</b>`).join('')
        + `</div>`;
   }
