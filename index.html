@@ -286,6 +286,13 @@
   .chip.dbl,.chip.trb{background:transparent;border:1.5px solid var(--lime-d);color:var(--lime-d)}
 
   /* checkout range segmented (uses select normally; chart) */
+  /* range segmented control (Play) */
+  .rangewrap{margin:12px 0 4px}
+  .rangewrap .eyebrow{display:block;margin-bottom:9px}
+  .rangeseg{display:flex;gap:7px}
+  .rangeseg button{flex:1;height:34px;border-radius:9px;border:1px solid var(--line3);background:none;
+    color:var(--mut2);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;cursor:pointer}
+  .rangeseg button.active{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
   /* checkout chart — dense PDC-card style list */
   .chartbar{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;
     border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 2px;
@@ -572,6 +579,44 @@
         <label class="cfgrow">Show D/T values <span class="switch"><input type="checkbox" id="coShowVals"><span class="slider"></span></span></label>
       </div>
     </div>
+    <div class="tabgroup">
+      <div class="subtabs">
+        <button type="button" class="subtab active" data-ct="practice">Practice</button>
+        <button type="button" class="subtab" data-ct="play">Play</button>
+      </div>
+    </div>
+
+    <!-- ---- PLAY: a short leg from a checkout score ---- -->
+    <div id="coPlayWrap" style="display:none">
+      <div class="card">
+        <div class="prompt">
+          <div class="label">Playing from <span id="pStart">—</span></div>
+          <div class="big" id="pScore">—</div>
+          <div class="sub">Visit <b id="pVisit">1</b> · darts <b id="pDarts">0</b></div>
+        </div>
+        <div class="coach hidden" id="pCoach">
+          <span class="k">Standard out</span>
+          <span class="v" id="pCoachV"></span>
+        </div>
+        <div class="combo" id="pCombo"></div>
+        <div class="hint info" id="pHint">&nbsp;</div>
+        <div class="boardwrap"><svg id="pboard" class="dboard" viewBox="-244 -244 488 488" aria-label="dartboard"></svg></div>
+        <div class="row">
+          <button type="button" class="btn alt fix" id="pNew">New</button>
+          <button type="button" class="btn" id="pReveal">Show out</button>
+        </div>
+      </div>
+      <div class="rangewrap">
+        <div class="eyebrow">Range</div>
+        <div class="rangeseg" id="pRange">
+          <button type="button" data-r="easy">Easy</button>
+          <button type="button" data-r="mid">Common</button>
+          <button type="button" data-r="big">Big</button>
+          <button type="button" data-r="all">Any</button>
+        </div>
+      </div>
+    </div>
+
     <div class="card" id="coHome" style="position:relative">
       <div class="prompt">
         <div class="label">Checkout from</div>
@@ -1009,14 +1054,18 @@ function renderLegCoach(force){
 }
 
 let mode='home';
+let coView = SETTINGS.coView || 'practice';   // Closings sub-tab: practice | play
 const SLUG={home:'home',checkout:'close',values:'td',subtract:'subtract',adds:'adds',round:'round',leg:'full'};
 const FROMSLUG=Object.fromEntries(Object.entries(SLUG).map(([k,v])=>[v,k]));
 const VSLUG={board:'board',table:'table',hit:'hit'};                 // quiz = default (no segment)
 const VFROM={notation:'quiz',board:'board',table:'table',hit:'hit'};
 const HSLUG={seq:'seq',grp:'digit',ach:'can',imp:'cant'};
 const HFROM={seq:'seq',digit:'grp',can:'ach',cant:'imp'};
+const CSLUG={play:'play'};                                           // practice = default (no segment)
+const CFROM={practice:'practice',play:'play'};
 function curPath(){ // full hash path for the current mode + sub-tab + sub-sub-tab
   if(mode==='home') return '';
+  if(mode==='checkout') return 'close' + (coView!=='practice' ? '/'+(CSLUG[coView]||coView) : '');
   if(mode!=='values') return SLUG[mode];
   let p='td';
   if(valView!=='quiz') p+='/'+(VSLUG[valView]||valView);
@@ -1034,6 +1083,7 @@ function applyHash(){ // parse the URL hash into mode / valView / hitOrd, then s
     valView = parts[1] ? (VFROM[parts[1]]||'quiz') : 'quiz';
     if(valView==='hit') hitOrd = HFROM[parts[2]]||'seq';
   }
+  if(m==='checkout') coView = parts[1] ? (CFROM[parts[1]]||'practice') : 'practice';
   selectMode(m, true);
 }
 function selectMode(m, fromHash){
@@ -1049,7 +1099,7 @@ function selectMode(m, fromHash){
   if(m==='adds') newAdd();
   if(m==='values') setValView(valView, true);
   if(m==='round') newRound();
-  if(m==='checkout') newCo();
+  if(m==='checkout') setCoView(coView, true);
   if(m==='leg') newLeg(true);
   updateKeypad();
   focusActive();
@@ -1353,7 +1403,7 @@ document.querySelectorAll('.hittab').forEach(b=>{
 });
 function setValView(v, fromHash){
   valView=v; SETTINGS.valView=v; saveSettings();
-  document.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
+  document.querySelectorAll('.subtab[data-vt]').forEach(x=>x.classList.toggle('active', x.dataset.vt===v));
   el('valQuiz').style.display = v==='quiz'?'':'none';
   el('valBoardWrap').style.display = v==='board'?'':'none';
   el('valTableWrap').style.display = v==='table'?'':'none';
@@ -1367,7 +1417,7 @@ function setValView(v, fromHash){
   if(!fromHash) setHash();
   if(mode==='values') updateKeypad();
 }
-document.querySelectorAll('.subtab').forEach(b=> b.onclick=()=>setValView(b.dataset.vt));
+document.querySelectorAll('.subtab[data-vt]').forEach(b=> b.onclick=()=>setValView(b.dataset.vt));
 
 /* ------------------------------------------------------------------ */
 /*  ROUND & ADJUST mode                                                */
@@ -1539,6 +1589,89 @@ function checkCo(){ // Throw button: commit the current darts
 }
 function setReveal(on){ revealOn=on; SETTINGS.coReveal=on; saveSettings(); el('coReveal').classList.toggle('on',on); updateCoInfo(); }
 el('coGo').onclick=checkCo;
+
+/* ------------------------------------------------------------------ */
+/*  CLOSINGS · PLAY — a short leg from a checkout score               */
+/* ------------------------------------------------------------------ */
+let play={};
+function playRange(){ return SETTINGS.playRange || 'mid'; }
+function playSum(){ const r=parseCheckout(play.tokens.join(' ')); return (!play.tokens.length||r.error)?0:r.sum; }
+function playRem(){ return play.visitStart - playSum(); }
+function newPlay(){
+  const s=randomCheckout(playRange());
+  play={start:s, visitStart:s, visit:1, darts:0, tokens:[], solved:false, t0:performance.now()};
+  setHint('pHint','Tap the board — finish on a double','info');
+  renderPlay();
+}
+function renderPlay(){
+  el('pStart').textContent=play.start;
+  el('pScore').textContent=playRem();
+  el('pVisit').textContent=play.visit;
+  el('pDarts').textContent=play.darts;
+  document.querySelectorAll('#pRange button').forEach(b=>b.classList.toggle('active', b.dataset.r===playRange()));
+  // dart chips for the visit in progress (tap one to undo it)
+  const box=el('pCombo'); box.innerHTML='';
+  if(!play.tokens.length){
+    const e=document.createElement('span'); e.className='empty';
+    e.textContent = play.solved ? 'closed!' : 'visit '+play.visit+' — 3 darts';
+    box.appendChild(e);
+  } else play.tokens.forEach((t,i)=>{
+    const s=document.createElement('span');
+    const dbl=/^D/.test(t)||t==='DB', trb=/^T/.test(t);
+    s.className='chip'+(dbl?' dbl':'')+(trb?' trb':'');
+    s.innerHTML=t+'<span class="x">✕</span>'; s.title='tap to undo';
+    s.addEventListener('click',()=>{ if(play.solved) return; play.tokens.splice(i,1); play.darts--; renderPlay(); });
+    box.appendChild(s);
+  });
+  // coach: the standard out for what's left
+  const c=el('pCoach');
+  if(coachOn && !play.solved){ c.classList.remove('hidden'); el('pCoachV').textContent=standardCheckout(playRem())||'no 3-dart out'; }
+  else c.classList.add('hidden');
+}
+function playDart(tok){
+  if(play.solved || play.tokens.length>=3) return;
+  const next=play.tokens.concat([tok]);
+  const r=parseCheckout(next.join(' '));
+  if(r.error) return;
+  play.tokens=next; play.darts++;
+  const rem=play.visitStart-r.sum;
+  if(rem===0 && r.finishesDouble){ playWin(); return; }
+  if(rem<0 || rem===1 || (rem===0 && !r.finishesDouble)){   // bust — visit void
+    setHint('pHint','Bust · back to '+play.visitStart,'bad');
+    play.tokens=[]; play.visit++; renderPlay(); return;
+  }
+  if(play.tokens.length>=3){                                // visit done, carry the remainder
+    play.visitStart=rem; play.tokens=[]; play.visit++;
+    setHint('pHint',rem+' left','info');
+  }
+  renderPlay();
+}
+function playWin(){
+  play.solved=true;
+  record(true, performance.now()-play.t0);
+  setHint('pHint','✓ Closed from '+play.start+' in '+play.darts+' darts','good');
+  renderPlay(); renderStats();
+  setTimeout(()=>{ if(play.solved) newPlay(); }, 1900);
+}
+buildDartboard(el('pboard'), playDart);
+function setCoView(v, fromHash){
+  coView = (v==='play') ? 'play' : 'practice';
+  SETTINGS.coView=coView; saveSettings();
+  document.querySelectorAll('.subtab[data-ct]').forEach(x=>x.classList.toggle('active', x.dataset.ct===coView));
+  el('coHome').style.display   = coView==='practice' ? '' : 'none';
+  el('coPlayWrap').style.display = coView==='play' ? '' : 'none';
+  if(coView==='practice') newCo(); else if(!play.start || play.solved) newPlay(); else renderPlay();
+  if(!fromHash) setHash();
+}
+document.querySelectorAll('.subtab[data-ct]').forEach(b=> b.onclick=()=>setCoView(b.dataset.ct));
+el('pNew').onclick=()=>newPlay();
+el('pReveal').onclick=()=>{
+  const left=playRem(), out=standardCheckout(left);
+  setHint('pHint', out ? ('From '+left+': '+out) : ('No 3-dart out from '+left), 'info');
+};
+document.querySelectorAll('#pRange button').forEach(b=> b.onclick=()=>{
+  SETTINGS.playRange=b.dataset.r; saveSettings(); newPlay();
+});
 el('coReveal').onclick=()=>setReveal(!revealOn);
 document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return;
   if(mode==='checkout'){ e.preventDefault(); checkCo(); }
