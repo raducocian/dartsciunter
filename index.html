@@ -337,6 +337,11 @@
   .key:active{filter:brightness(.96)}
   .key.del{background:var(--track);border-color:var(--line);color:var(--mut)}
   .key.ok{background:var(--lime);border-color:var(--lime);color:var(--lime-ink);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px}
+  /* .ops: 4-column calculator layout with + / − (Closings · Play) */
+  .key.op{display:none;background:var(--track);border-color:var(--line);color:var(--ink);font-size:23px}
+  .keypad.ops{grid-template-columns:repeat(4,1fr);max-width:400px}
+  .keypad.ops .key.op{display:flex}
+  .keypad.ops .key[data-k="0"],.keypad.ops .key.ok{grid-column:span 2}
 
   /* stats modal */
   .modal{position:fixed;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;padding:0;
@@ -601,7 +606,7 @@
           <span class="v" id="pCoachV"></span>
         </div>
         <div class="combo" id="pCombo"></div>
-        <input class="answer" id="pInput" inputmode="none" placeholder="score thrown" autocomplete="off" />
+        <input class="answer" id="pInput" inputmode="none" placeholder="60 or 20+20+20" autocomplete="off" />
         <div class="hint info" id="pHint">&nbsp;</div>
         <div class="row" id="pRow">
           <button type="button" class="btn alt fix" id="pNew">New</button>
@@ -696,9 +701,11 @@
     <button type="button" class="key" data-k="1">1</button>
     <button type="button" class="key" data-k="2">2</button>
     <button type="button" class="key" data-k="3">3</button>
+    <button type="button" class="key op" data-k="+">+</button>
     <button type="button" class="key" data-k="4">4</button>
     <button type="button" class="key" data-k="5">5</button>
     <button type="button" class="key" data-k="6">6</button>
+    <button type="button" class="key op" data-k="-">−</button>
     <button type="button" class="key" data-k="7">7</button>
     <button type="button" class="key" data-k="8">8</button>
     <button type="button" class="key" data-k="9">9</button>
@@ -1163,6 +1170,7 @@ function updateKeypad(){ el('keypad').classList.toggle('hidden', !currentNumInpu
 function moveKeypad(intoPlay){
   const kp=el('keypad'), target=el(intoPlay?'pKeypadSlot':'keypadHome');
   if(kp.parentNode!==target) target.appendChild(kp);
+  kp.classList.toggle('ops', !!intoPlay);      // reveal + / − and go 4-wide
 }
 function keypadSubmit(){
   if(mode==='subtract') (el('subInput').className.includes('good')?newSub():checkSub());
@@ -1174,9 +1182,11 @@ function keypadSubmit(){
 el('keypad').addEventListener('click',e=>{
   const b=e.target.closest('.key'); if(!b) return;
   const k=b.dataset.k, inp=currentNumInput(); if(!inp) return;
+  const expr = (mode==='checkout' && coView==='play');     // Play accepts 20+20+20
   if(k==='ok'){ keypadSubmit(); }
   else if(k==='del'){ inp.value=inp.value.slice(0,-1); }
-  else if(inp.value.length<4){ inp.value+=k; }
+  else if(k==='+'||k==='-'){ if(expr && /\d$/.test(inp.value)) inp.value+=k; }
+  else if(inp.value.length < (expr?14:4)){ inp.value+=k; }
 });
 
 /* ------------------------------------------------------------------ */
@@ -1617,7 +1627,7 @@ function playRange(){ return SETTINGS.playRange || 'mid'; }
 function startPlay(score){
   play={start:score, score:score, visit:1, thrown:[], solved:false, t0:performance.now()};
   el('pInput').value='';
-  setHint('pHint','Type what you scored, then Enter','info');
+  setHint('pHint','Type your score — or add the darts: 20+20+20','info');
   renderPlay(); focusActive();
 }
 function newPlay(){ startPlay(randomCheckout(playRange())); }
@@ -1643,13 +1653,20 @@ function renderPlay(){
   else c.classList.add('hidden');
   updateKeypad();                      // hide the keys once closed, bring them back on replay
 }
+/* a visit score: a plain number, or darts added up like 20+20+20 (− also allowed) */
+function evalScore(raw){
+  const s=raw.replace(/\s+/g,'').replace(/[−–]/g,'-');
+  if(!/^\d+([+-]\d+)*$/.test(s)) return null;
+  return s.match(/[+-]?\d+/g).reduce((a,p)=>a+parseInt(p,10),0);
+}
 function playEnter(){
   if(play.solved) return;
   const raw=el('pInput').value.trim();
   if(!raw) return;
-  const v=parseInt(raw,10);
+  const v=evalScore(raw);
   el('pInput').value='';
-  if(isNaN(v)||v<0||v>180){ setHint('pHint','Enter a score 0–180','bad'); return; }
+  if(v===null){ setHint('pHint','Type a score, or darts like 20+20+20','bad'); return; }
+  if(v<0||v>180){ setHint('pHint','Enter a score 0–180','bad'); return; }
   const rem=play.score-v;
   if(rem<0 || rem===1){                       // bust — visit void, score stands
     play.visit++; setHint('pHint','Bust · still '+play.score,'bad'); renderPlay(); return;
